@@ -1,0 +1,24 @@
+.p-dialog-mask {
+  backdrop-filter: blur(6px) !important;
+  background-color: color-mix(in srgb, theme('colors.slate.900') 40%, transparent) !important;
+}
+
+.p-dialog {
+  border-radius: var(--border-radius-xl) !important;
+  box-shadow: 0 25px 50px -12px color-mix(in srgb, theme('colors.black') 10%, transparent) !important;
+  border: 1px solid var(--surface-border) !important;
+}
+
+.p-dialog .p-dialog-header {
+  padding: 1rem 1.5rem !important;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.p-dialog .p-dialog-content {
+  padding: 1.5rem;
+}
+
+.p-dialog .p-dialog-footer {
+  padding: 1rem 1.5rem !important;
+  border-top: 1px solid var(--surface-border);
+}

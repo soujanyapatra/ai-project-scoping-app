@@ -1,0 +1,78 @@
+.p-button {
+  border-radius: var(--border-radius-lg) !important;
+  font-weight: 400 !important;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease !important;
+  border: 1px solid transparent !important;
+  text-align: left;
+  height: 40px;
+}
+
+.p-button-label {
+  font-weight: 500 !important;
+}
+
+/* Primary */
+.p-button,
+.p-button.p-button-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color-text) !important;
+  box-shadow: 0 4px 12px color-mix(in srgb, theme('colors.brand.600') 20%, transparent) !important;
+}
+
+.p-button:hover,
+.p-button.p-button-primary:hover {
+  background-color: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+}
+
+/* Secondary */
+.p-button.p-button-secondary {
+  background-color: theme('colors.slate.50') !important;
+  border-color: theme('colors.slate.200') !important;
+  color: theme('colors.slate.600') !important;
+  box-shadow: 0 1px 3px color-mix(in srgb, theme('colors.black') 6%, transparent) !important;
+}
+
+.p-button.p-button-secondary:hover {
+  background-color: theme('colors.slate.100') !important;
+  border-color: theme('colors.slate.300') !important;
+}
+
+/* Text / ghost */
+.p-button.p-button-text {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: theme('colors.slate.500') !important;
+  box-shadow: none !important;
+}
+
+.p-button.p-button-text:hover {
+  background: theme('colors.slate.100') !important;
+  color: theme('colors.slate.700') !important;
+}
+
+/* Danger */
+.p-button.p-button-danger {
+  background: linear-gradient(
+    to bottom right,
+    theme('colors.red.600'),
+    theme('colors.red.500')
+  ) !important;
+  border-color: transparent !important;
+  color: theme('colors.white') !important;
+  box-shadow: 0 4px 12px color-mix(in srgb, theme('colors.red.600') 25%, transparent) !important;
+}
+
+.p-button.p-button-danger:hover {
+  background: linear-gradient(
+    to bottom right,
+    theme('colors.red.700'),
+    theme('colors.red.600')
+  ) !important;
+}
+
+.p-button:active {
+  transform: scale(0.96);
+}

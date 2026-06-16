@@ -1,0 +1,48 @@
+/* PrimeVue Textarea — field chrome aligned with input.css (single-line text fields). */
+
+textarea.p-inputtext {
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--surface-border) !important;
+  transition: all 0.2s ease;
+  background: theme('colors.white') !important;
+  min-height: 2.5rem !important;
+  height: auto !important;
+  padding: 0.5rem 0.85rem !important;
+  line-height: 1.5;
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+}
+
+/* Allow Tailwind rounded-* utilities to override PrimeVue's border-radius */
+textarea.p-inputtext.rounded-none {
+  border-radius: 0 !important;
+}
+
+textarea.p-inputtext.rounded-full {
+  border-radius: 9999px !important;
+}
+
+textarea.p-inputtext.rounded-lg {
+  border-radius: 0.5rem !important;
+}
+
+textarea.p-inputtext.rounded-xl {
+  border-radius: 0.75rem !important;
+}
+
+textarea.p-inputtext::placeholder {
+  color: theme('colors.slate.400') !important;
+  font-weight: 400 !important;
+  opacity: 1;
+}
+
+textarea.p-inputtext:enabled:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, theme('colors.violet.600') 10%, transparent) !important;
+  outline: none !important;
+}
+
+textarea.p-inputtext.p-invalid {
+  border-color: theme('colors.red.500') !important;
+  box-shadow: none !important;
+}

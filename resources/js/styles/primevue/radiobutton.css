@@ -1,0 +1,55 @@
+/**
+ * Match Lara theme structure but align with app `--primary-color` (brand) like checkbox.css,
+ * and prevent flex layouts from shrinking the control to zero width.
+ */
+.p-radiobutton {
+  position: relative !important;
+  display: inline-flex !important;
+  flex-shrink: 0 !important;
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  min-height: 22px !important;
+}
+
+.p-radiobutton .p-radiobutton-box {
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-color: theme('colors.slate.300') !important;
+  background: theme('colors.white') !important;
+  width: 22px !important;
+  height: 22px !important;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s !important;
+}
+
+.p-radiobutton.p-highlight .p-radiobutton-box {
+  border-color: var(--primary-color) !important;
+  background: var(--primary-color) !important;
+}
+
+.p-radiobutton:not(.p-disabled):has(.p-radiobutton-input:hover) .p-radiobutton-box {
+  border-color: var(--primary-color) !important;
+}
+
+.p-radiobutton:not(.p-disabled):has(.p-radiobutton-input:hover).p-highlight .p-radiobutton-box {
+  border-color: var(--primary-hover) !important;
+  background: var(--primary-hover) !important;
+}
+
+.p-radiobutton:not(.p-disabled):has(.p-radiobutton-input:focus-visible) .p-radiobutton-box {
+  outline: 0 none !important;
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-color) 28%, transparent) !important;
+  border-color: var(--primary-color) !important;
+}
+
+/* Overlay input matches visible ring so unchecked state stays visible in flex rows */
+.p-radiobutton .p-radiobutton-input {
+  border-color: theme('colors.slate.300') !important;
+}
+
+.p-radiobutton.p-highlight .p-radiobutton-input {
+  border-color: var(--primary-color) !important;
+}

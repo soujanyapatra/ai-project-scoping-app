@@ -1,0 +1,20 @@
+:root {
+  --primary-color: theme('colors.brand.600');
+  --primary-color-text: theme('colors.white');
+  --primary-light: theme('colors.brand.50');
+  --primary-hover: theme('colors.brand.700');
+  --surface-border: theme('colors.slate.200');
+  --surface-ground: theme('colors.slate.50');
+  --border-radius-xl: 18px;
+  --border-radius-lg: 14px;
+  --border-radius-md: 10px;
+  --border-radius-sm: 6px;
+  --border-radius-xs: 4px;
+  --font-size-base: 0.875rem;
+  /* 14px */
+}
+
+/* Global 14px for all PrimeVue components */
+.p-component {
+  font-size: var(--font-size-base) !important;
+}

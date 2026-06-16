@@ -1,0 +1,22 @@
+.selection-card {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius-lg);
+  padding: 1.25rem;
+  background: white;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
+}
+
+.selection-card:hover {
+  border-color: var(--primary-color);
+  background: var(--primary-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%);
+}
+
+.selection-card.selected {
+  border-color: var(--primary-color);
+  border-width: 2px;
+  background: var(--primary-light);
+}

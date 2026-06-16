@@ -1,0 +1,49 @@
+.p-checkbox {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+}
+
+.p-checkbox .p-checkbox-box {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 6px !important;
+  border: 1.5px solid theme('colors.slate.300') !important;
+  background: theme('colors.white') !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.p-checkbox:not(.p-checkbox-disabled):hover .p-checkbox-box {
+  border-color: var(--primary-color) !important;
+  background: var(--primary-light) !important;
+}
+
+/* PrimeVue 3.5+ puts p-highlight on the root when checked (not p-checkbox-checked on root). */
+.p-checkbox.p-checkbox-checked .p-checkbox-box,
+.p-checkbox.p-highlight .p-checkbox-box,
+.p-checkbox .p-checkbox-box.p-highlight {
+  background: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 2px 4px color-mix(in srgb, theme('colors.violet.900') 20%, transparent) !important;
+}
+
+.p-checkbox.p-checkbox-checked:not(.p-checkbox-disabled):hover .p-checkbox-box,
+.p-checkbox.p-highlight:not(.p-disabled):hover .p-checkbox-box,
+.p-checkbox .p-checkbox-box.p-highlight:hover {
+  background: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+}
+
+.p-checkbox .p-checkbox-box .p-checkbox-icon {
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  color: theme('colors.white') !important;
+  display: block !important;
+}
+
+.p-checkbox.p-checkbox-disabled {
+  opacity: 0.5;
+}

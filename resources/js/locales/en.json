@@ -1,0 +1,32 @@
+{
+  "app": {
+    "title": "AI Project Scoping Tool",
+    "subtitle": "Discovery in, scope document out — streamed section-by-section."
+  },
+  "discovery": {
+    "title": "Discovery form",
+    "submit": "Generate scope",
+    "reset": "Reset",
+    "featuresHint": "Press Enter to add each feature.",
+    "fields": {
+      "projectType": "Project type",
+      "industry": "Industry",
+      "budgetUsd": "Budget (USD)",
+      "timelineStart": "Timeline start",
+      "timelineEnd": "Timeline end",
+      "features": "Key features",
+      "platforms": "Target platforms",
+      "integrations": "Integrations",
+      "constraints": "Constraints",
+      "successCriteria": "Success criteria"
+    }
+  },
+  "output": {
+    "title": "Live scope output",
+    "waiting": "Fill the form and generate to see streamed output here.",
+    "error": "Something went wrong.",
+    "ready": "Ready",
+    "stepPrefix": "Step"
+  }
+}
+

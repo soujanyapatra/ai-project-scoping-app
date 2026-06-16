@@ -1,0 +1,67 @@
+/* Single-line text fields and Calendar’s text input (not the date panel — see calendar.css). */
+
+input.p-inputtext,
+.p-calendar .p-inputtext {
+  border-radius: var(--border-radius-md);
+  border: 0.0625rem solid var(--surface-border) !important;
+  transition: all 0.2s ease;
+  background: theme('colors.white') !important;
+  height: 2.5rem !important;
+  /* h-10 default */
+  padding: 0 0.85rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+}
+
+/* Allow Tailwind rounded-* utilities to override PrimeVue's border-radius */
+input.p-inputtext.rounded-none,
+.p-calendar .p-inputtext.rounded-none {
+  border-radius: 0 !important;
+}
+
+input.p-inputtext.rounded-full,
+.p-calendar .p-inputtext.rounded-full {
+  /* Effectively a pill: large enough in rem to match common rounded-full (was 9999px). */
+  border-radius: 100rem !important;
+}
+
+input.p-inputtext.rounded-lg,
+.p-calendar .p-inputtext.rounded-lg {
+  border-radius: 0.5rem !important;
+}
+
+input.p-inputtext.rounded-xl,
+.p-calendar .p-inputtext.rounded-xl {
+  border-radius: 0.75rem !important;
+}
+
+input.p-inputtext::placeholder,
+.p-calendar .p-inputtext::placeholder {
+  color: theme('colors.slate.400') !important;
+  font-weight: 400 !important;
+  opacity: 1;
+}
+
+/* Allow icon-prefixed inputs to override left padding */
+input.p-inputtext.has-prefix-icon {
+  padding-left: 2.5rem !important;
+}
+
+input.p-inputtext:enabled:focus,
+.p-calendar .p-inputtext:enabled:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, theme('colors.violet.600') 10%, transparent) !important;
+  outline: none !important;
+}
+
+/* Invalid state */
+input.p-inputtext.p-invalid,
+.p-dropdown.p-invalid,
+.p-password.p-invalid input,
+.p-calendar.p-invalid .p-inputtext,
+input.p-inputtext.p-invalid:enabled:focus,
+.p-dropdown.p-invalid:enabled:focus,
+.p-calendar.p-invalid .p-inputtext:enabled:focus {
+  border-color: theme('colors.red.500') !important;
+  box-shadow: none !important;
+}

@@ -1,0 +1,48 @@
+.p-dropdown {
+  border-radius: var(--border-radius-md) !important;
+  border: 1px solid var(--surface-border) !important;
+  transition: all 0.2s ease;
+  background: theme('colors.white') !important;
+  height: 2.5rem !important; /* h-10 default */
+}
+
+.p-dropdown .p-dropdown-label {
+  padding: 0 0.85rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+  border: none !important;
+  background: transparent !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.p-dropdown:not(.p-disabled).p-focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, theme('colors.violet.600') 10%, transparent) !important;
+  outline: none !important;
+}
+
+.p-dropdown-panel {
+  border-radius: var(--border-radius-md) !important;
+  padding: 0.5rem !important;
+  box-shadow: 0 10px 15px -3px color-mix(in srgb, theme('colors.black') 10%, transparent) !important;
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  background: var(--primary-light) !important;
+  color: var(--primary-color) !important;
+}
+
+.p-dropdown-item-label {
+  font-size: 0.875rem !important;
+}
+
+.p-dropdown-item {
+  padding: 10px;
+  border-radius: 4px;
+}
+
+/* Navbar locale picker panel is portaled to `body`; keep LTR so flag + code order stays correct when `html` is RTL */
+.p-dropdown-panel.navbar-locale-panel {
+  direction: ltr;
+}

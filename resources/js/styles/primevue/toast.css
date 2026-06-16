@@ -1,0 +1,103 @@
+/* Override PrimeVue Toast to remove the left-side icon */
+.p-toast .p-toast-message .p-toast-message-icon {
+  display: none !important;
+}
+
+/*
+ * Lara theme beats low-specificity rules: use full selectors + !important.
+ * Compact vertical padding + small close hit-target (theme defaults: 1rem pad, 2rem close).
+ */
+.p-toast .p-toast-message .p-toast-message-content {
+  padding: theme('spacing.2') theme('spacing.2') theme('spacing.2') theme('spacing.3') !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: theme('spacing.2') !important;
+}
+
+.p-toast .p-toast-message .p-toast-message-content .p-toast-message-text {
+  margin: 0 !important;
+}
+
+.p-toast .p-toast-message .p-toast-message-content .p-toast-detail {
+  margin: 0 !important;
+  font-size: theme('fontSize.toast-detail') !important;
+  line-height: theme('lineHeight.snug') !important;
+}
+
+/* Radius + neutral chrome — colors.toast.canvasBorder, borderRadius.2xl */
+.p-toast-message {
+  border-radius: theme('borderRadius.2xl') !important;
+  border: theme('borderWidth.DEFAULT') solid theme('colors.toast.canvasBorder') !important;
+}
+
+.p-toast-message-text {
+  margin-left: 0 !important;
+}
+
+/* Close: Lara sets 2rem × 2rem circle — shrink to spacing scale */
+.p-toast .p-toast-message .p-toast-icon-close {
+  width: theme('spacing.5') !important;
+  height: theme('spacing.5') !important;
+  min-width: theme('spacing.5') !important;
+  min-height: theme('spacing.5') !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+}
+
+.p-toast .p-toast-message .p-toast-icon-close svg {
+  width: theme('spacing.3') !important;
+  height: theme('spacing.3') !important;
+  font-size: theme('fontSize.toast-close-icon') !important;
+}
+
+/* Success — colors + shadow */
+.p-toast .p-toast-message.p-toast-message-success {
+  background-color: theme('colors.toast.success') !important;
+  border: theme('borderWidth.DEFAULT') solid theme('colors.toast.borderLight') !important;
+  border-left: theme('spacing.1.5') solid theme('colors.toast.successAccent') !important;
+  color: theme('colors.toast.text') !important;
+  box-shadow:
+    0 theme('spacing.2') theme('spacing.5')
+      color-mix(in srgb, theme('colors.toast.success') 28%, transparent) !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-success .p-toast-detail,
+.p-toast .p-toast-message.p-toast-message-success .p-toast-summary,
+.p-toast .p-toast-message.p-toast-message-success .p-toast-message-text {
+  color: theme('colors.toast.text') !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-success .p-toast-icon-close {
+  color: theme('colors.toast.closeIcon') !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-success .p-toast-icon-close:hover {
+  color: theme('colors.toast.text') !important;
+  background: rgb(255 255 255 / 12%) !important;
+}
+
+/* Error — colors + shadow */
+.p-toast .p-toast-message.p-toast-message-error {
+  background-color: theme('colors.toast.error') !important;
+  border: theme('borderWidth.DEFAULT') solid theme('colors.toast.borderLight') !important;
+  border-left: theme('spacing.1.5') solid theme('colors.toast.errorAccent') !important;
+  color: theme('colors.toast.text') !important;
+  box-shadow:
+    0 theme('spacing.2') theme('spacing.5')
+      color-mix(in srgb, theme('colors.toast.error') 28%, transparent) !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-error .p-toast-detail,
+.p-toast .p-toast-message.p-toast-message-error .p-toast-summary,
+.p-toast .p-toast-message.p-toast-message-error .p-toast-message-text {
+  color: theme('colors.toast.text') !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-error .p-toast-icon-close {
+  color: theme('colors.toast.closeIcon') !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-error .p-toast-icon-close:hover {
+  color: theme('colors.toast.text') !important;
+  background: rgb(255 255 255 / 12%) !important;
+}
