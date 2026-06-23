@@ -7,6 +7,10 @@ export function useAppToast() {
     toast.add({ severity: 'error', summary: 'Error', detail, life: 5000 })
   }
 
-  return { showError }
+  const showSuccess = (detail: string) => {
+    toast.add({ severity: 'success', summary: 'Success', detail, life: 3000 })
+  }
+
+  return { showError, showSuccess }
 }
 

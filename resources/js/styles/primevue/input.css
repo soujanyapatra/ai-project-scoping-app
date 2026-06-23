@@ -1,11 +1,11 @@
-/* Single-line text fields and Calendar’s text input (not the date panel — see calendar.css). */
+/* Single-line text fields and Calendar’s text input */
 
 input.p-inputtext,
 .p-calendar .p-inputtext {
   border-radius: var(--border-radius-md);
   border: 0.0625rem solid var(--surface-border) !important;
-  transition: all 0.2s ease;
-  background: theme('colors.white') !important;
+  transition: all 0.15s ease;
+  background: #ffffff !important;
   height: 2.5rem !important;
   /* h-10 default */
   padding: 0 0.85rem !important;
@@ -21,7 +21,6 @@ input.p-inputtext.rounded-none,
 
 input.p-inputtext.rounded-full,
 .p-calendar .p-inputtext.rounded-full {
-  /* Effectively a pill: large enough in rem to match common rounded-full (was 9999px). */
   border-radius: 100rem !important;
 }
 
@@ -37,7 +36,7 @@ input.p-inputtext.rounded-xl,
 
 input.p-inputtext::placeholder,
 .p-calendar .p-inputtext::placeholder {
-  color: theme('colors.slate.400') !important;
+  color: #a1a1aa !important;
   font-weight: 400 !important;
   opacity: 1;
 }
@@ -49,8 +48,8 @@ input.p-inputtext.has-prefix-icon {
 
 input.p-inputtext:enabled:focus,
 .p-calendar .p-inputtext:enabled:focus {
-  border-color: var(--primary-color) !important;
-  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, theme('colors.violet.600') 10%, transparent) !important;
+  border-color: #09090b !important;
+  box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.05) !important;
   outline: none !important;
 }
 
@@ -62,6 +61,6 @@ input.p-inputtext.p-invalid,
 input.p-inputtext.p-invalid:enabled:focus,
 .p-dropdown.p-invalid:enabled:focus,
 .p-calendar.p-invalid .p-inputtext:enabled:focus {
-  border-color: theme('colors.red.500') !important;
+  border-color: #ef4444 !important;
   box-shadow: none !important;
 }

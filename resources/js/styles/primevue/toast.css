@@ -1,103 +1,89 @@
-/* Override PrimeVue Toast to remove the left-side icon */
-.p-toast .p-toast-message .p-toast-message-icon {
-  display: none !important;
+.p-toast {
+  width: 20rem !important;
 }
 
-/*
- * Lara theme beats low-specificity rules: use full selectors + !important.
- * Compact vertical padding + small close hit-target (theme defaults: 1rem pad, 2rem close).
- */
+.p-toast .p-toast-message {
+  border-radius: var(--border-radius-xl) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+  margin-bottom: 0.75rem !important;
+  border: 1px solid #e4e4e7 !important;
+}
+
 .p-toast .p-toast-message .p-toast-message-content {
-  padding: theme('spacing.2') theme('spacing.2') theme('spacing.2') theme('spacing.3') !important;
+  padding: 0.75rem 1rem !important;
   display: flex !important;
   align-items: center !important;
-  gap: theme('spacing.2') !important;
+  gap: 0.5rem !important;
 }
 
-.p-toast .p-toast-message .p-toast-message-content .p-toast-message-text {
+.p-toast .p-toast-message .p-toast-message-icon {
+  font-size: 1rem !important;
+  margin-right: 0.25rem !important;
+}
+
+.p-toast .p-toast-message .p-toast-message-text {
   margin: 0 !important;
+  flex: 1 1 auto !important;
 }
 
-.p-toast .p-toast-message .p-toast-message-content .p-toast-detail {
-  margin: 0 !important;
-  font-size: theme('fontSize.toast-detail') !important;
-  line-height: theme('lineHeight.snug') !important;
+.p-toast .p-toast-message .p-toast-summary {
+  font-weight: 600 !important;
+  font-size: 0.8125rem !important;
 }
 
-/* Radius + neutral chrome — colors.toast.canvasBorder, borderRadius.2xl */
-.p-toast-message {
-  border-radius: theme('borderRadius.2xl') !important;
-  border: theme('borderWidth.DEFAULT') solid theme('colors.toast.canvasBorder') !important;
+.p-toast .p-toast-message .p-toast-detail {
+  font-size: 0.75rem !important;
+  margin-top: 0.125rem !important;
 }
 
-.p-toast-message-text {
-  margin-left: 0 !important;
-}
-
-/* Close: Lara sets 2rem × 2rem circle — shrink to spacing scale */
-.p-toast .p-toast-message .p-toast-icon-close {
-  width: theme('spacing.5') !important;
-  height: theme('spacing.5') !important;
-  min-width: theme('spacing.5') !important;
-  min-height: theme('spacing.5') !important;
-  flex-shrink: 0 !important;
-  padding: 0 !important;
-}
-
-.p-toast .p-toast-message .p-toast-icon-close svg {
-  width: theme('spacing.3') !important;
-  height: theme('spacing.3') !important;
-  font-size: theme('fontSize.toast-close-icon') !important;
-}
-
-/* Success — colors + shadow */
+/* Success */
 .p-toast .p-toast-message.p-toast-message-success {
-  background-color: theme('colors.toast.success') !important;
-  border: theme('borderWidth.DEFAULT') solid theme('colors.toast.borderLight') !important;
-  border-left: theme('spacing.1.5') solid theme('colors.toast.successAccent') !important;
-  color: theme('colors.toast.text') !important;
-  box-shadow:
-    0 theme('spacing.2') theme('spacing.5')
-      color-mix(in srgb, theme('colors.toast.success') 28%, transparent) !important;
+  background: #09090b !important;
+  border-color: #27272a !important;
+  color: #ffffff !important;
 }
 
-.p-toast .p-toast-message.p-toast-message-success .p-toast-detail,
+.p-toast .p-toast-message.p-toast-message-success .p-toast-message-icon,
 .p-toast .p-toast-message.p-toast-message-success .p-toast-summary,
-.p-toast .p-toast-message.p-toast-message-success .p-toast-message-text {
-  color: theme('colors.toast.text') !important;
+.p-toast .p-toast-message.p-toast-message-success .p-toast-detail {
+  color: #ffffff !important;
 }
 
 .p-toast .p-toast-message.p-toast-message-success .p-toast-icon-close {
-  color: theme('colors.toast.closeIcon') !important;
+  color: #a1a1aa !important;
 }
 
-.p-toast .p-toast-message.p-toast-message-success .p-toast-icon-close:hover {
-  color: theme('colors.toast.text') !important;
-  background: rgb(255 255 255 / 12%) !important;
-}
-
-/* Error — colors + shadow */
+/* Error */
 .p-toast .p-toast-message.p-toast-message-error {
-  background-color: theme('colors.toast.error') !important;
-  border: theme('borderWidth.DEFAULT') solid theme('colors.toast.borderLight') !important;
-  border-left: theme('spacing.1.5') solid theme('colors.toast.errorAccent') !important;
-  color: theme('colors.toast.text') !important;
-  box-shadow:
-    0 theme('spacing.2') theme('spacing.5')
-      color-mix(in srgb, theme('colors.toast.error') 28%, transparent) !important;
+  background: #ef4444 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
 }
 
-.p-toast .p-toast-message.p-toast-message-error .p-toast-detail,
+.p-toast .p-toast-message.p-toast-message-error .p-toast-message-icon,
 .p-toast .p-toast-message.p-toast-message-error .p-toast-summary,
-.p-toast .p-toast-message.p-toast-message-error .p-toast-message-text {
-  color: theme('colors.toast.text') !important;
+.p-toast .p-toast-message.p-toast-message-error .p-toast-detail {
+  color: #ffffff !important;
 }
 
 .p-toast .p-toast-message.p-toast-message-error .p-toast-icon-close {
-  color: theme('colors.toast.closeIcon') !important;
+  color: #fca5a5 !important;
 }
 
-.p-toast .p-toast-message.p-toast-message-error .p-toast-icon-close:hover {
-  color: theme('colors.toast.text') !important;
-  background: rgb(255 255 255 / 12%) !important;
+/* Close button */
+.p-toast .p-toast-message .p-toast-icon-close {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.p-toast .p-toast-message .p-toast-icon-close:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
 }
