@@ -524,59 +524,77 @@ watch(() => scopeStore.isStreaming, (streaming) => {
         <div v-else class="flex flex-col gap-5">
 
           <!-- Segment control: step tabs (Vercel-inspired) -->
-          <div class="flex p-1 bg-zinc-100 rounded-lg gap-1 border border-zinc-200/50">
+          <div class="grid grid-cols-3 p-1.5 bg-zinc-100/80 rounded-xl gap-1 border border-zinc-200/50">
             <button
               v-for="tab in [
-                { step: 1, label: '1. Classification', status: step1Status },
-                { step: 2, label: '2. Risk Mitigation', status: step2Status },
-                { step: 3, label: '3. Technical Scope', status: step3Status }
+                { step: 1, label: 'Classification', status: step1Status },
+                { step: 2, label: 'Risk Mitigation', status: step2Status },
+                { step: 3, label: 'Technical Scope', status: step3Status }
               ]"
               :key="tab.step"
               type="button"
-              class="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[12px] font-bold transition-all duration-150 border-none outline-none cursor-pointer rounded-md"
+              class="flex items-center justify-center gap-2 py-2 text-[11.5px] font-bold transition-all duration-200 border-none outline-none cursor-pointer rounded-lg"
               :class="[
                 activeTab === tab.step
-                  ? 'bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-950/5'
-                  : 'text-zinc-500 hover:text-zinc-800'
+                  ? 'bg-white text-zinc-950 shadow-[0_2px_8px_rgba(9,9,11,0.04)] ring-1 ring-zinc-950/5'
+                  : 'text-zinc-500 hover:text-zinc-900'
               ]"
               @click="activeTab = tab.step"
             >
               <span
                 v-if="tab.status === 'completed'"
-                class="h-3.5 w-3.5 rounded-full bg-emerald-500 text-white text-[8px] flex items-center justify-center font-extrabold"
+                class="h-4 w-4 rounded-full bg-emerald-500 text-white text-[8px] flex items-center justify-center font-bold"
               >✓</span>
               <span
                 v-else-if="tab.status === 'active'"
-                class="h-3.5 w-3.5 rounded-full bg-zinc-400 text-white text-[8px] flex items-center justify-center animate-pulse"
+                class="h-4 w-4 rounded-full bg-indigo-600 text-white text-[8px] flex items-center justify-center animate-pulse"
               >{{ tab.step }}</span>
               <span
                 v-else
-                class="h-3.5 w-3.5 rounded-full bg-zinc-250 text-zinc-450 text-[8px] flex items-center justify-center font-bold"
+                class="h-4 w-4 rounded-full bg-zinc-200 text-zinc-400 text-[8px] flex items-center justify-center font-bold"
               >{{ tab.step }}</span>
-              {{ tab.label }}
+              <span class="hidden sm:inline">{{ tab.label }}</span>
+              <span class="sm:hidden">Step {{ tab.step }}</span>
             </button>
           </div>
 
           <!-- View Mode selector & Title -->
-          <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-zinc-450">Format & Workspace</span>
+          <div class="flex items-center justify-between border-b border-zinc-150/80 pb-3">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-450 select-none">Workspace View</span>
             
-            <div class="flex p-0.5 bg-zinc-100 rounded-md gap-0.5 border border-zinc-200/40">
+            <div class="flex p-0.5 bg-zinc-100 rounded-lg gap-0.5 border border-zinc-200/50">
               <button
                 v-for="mode in [
-                  { key: 'steps', label: 'Tabs' },
-                  { key: 'full', label: 'Report' },
-                  { key: 'editor', label: 'Editor' }
+                  { key: 'steps', label: 'Tab view' },
+                  { key: 'full', label: 'Report doc' },
+                  { key: 'editor', label: 'Markdown editor' }
                 ]"
                 :key="mode.key"
                 type="button"
-                class="text-[11px] font-semibold px-3 py-1 transition-all duration-150 cursor-pointer border-none rounded"
+                class="text-[11px] font-bold px-3 py-1.5 transition-all duration-150 cursor-pointer border-none rounded-md flex items-center gap-1.5"
                 :class="[
-                  viewMode === mode.key ? 'bg-white text-zinc-950 shadow-xs' : 'text-zinc-500 hover:text-zinc-800'
+                  viewMode === mode.key ? 'bg-white text-zinc-950 shadow-xs ring-1 ring-zinc-950/5' : 'text-zinc-500 hover:text-zinc-800'
                 ]"
                 @click="viewMode = mode.key as any"
               >
-                {{ mode.label }}
+                <!-- SVG Icon for Tab View -->
+                <svg v-if="mode.key === 'steps'" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="9" y1="3" x2="9" y2="21"></line>
+                </svg>
+                <!-- SVG Icon for Report Doc -->
+                <svg v-else-if="mode.key === 'full'" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                <!-- SVG Icon for Markdown Editor -->
+                <svg v-else-if="mode.key === 'editor'" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                <span>{{ mode.label }}</span>
               </button>
             </div>
           </div>
@@ -600,10 +618,16 @@ watch(() => scopeStore.isStreaming, (streaming) => {
               </header>
               <div class="scope-prose" v-html="parseMarkdown(activeSection.content, activeSection.step) + (scopeStore.isStreaming && scopeStore.sections[scopeStore.sections.length - 1]?.step === activeSection.step ? '<span class=\'inline-block ml-0.5 w-1.5 h-4 bg-zinc-900 animate-pulse align-middle rounded-sm\'></span>' : '')"></div>
             </article>
-            <div v-else class="py-20 border border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-center gap-2">
-              <i class="pi pi-lock text-zinc-300 text-lg"></i>
-              <h5 class="text-xs font-bold text-zinc-700">Section Locked</h5>
-              <p class="text-[11px] text-zinc-450 max-w-[220px] leading-relaxed">This stage will render dynamically as soon as the previous analysis settles.</p>
+            <div v-else class="py-20 border border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-center p-6 bg-zinc-50/20 select-none">
+              <!-- Beautiful lock design -->
+              <div class="h-10 w-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400 mb-3 border border-zinc-200">
+                <svg class="h-4.5 w-4.5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <h5 class="text-xs font-bold text-zinc-950">Section Locked</h5>
+              <p class="text-[11px] text-zinc-400 max-w-[200px] leading-relaxed mt-1">This stage will render dynamically as soon as the previous analysis settles.</p>
             </div>
           </div>
 
@@ -621,22 +645,49 @@ watch(() => scopeStore.isStreaming, (streaming) => {
                 <p class="text-xs text-zinc-450 mt-1.5">Unified report detailing application constraints, risks, stack composition, and milestone schedules.</p>
                 
                 <!-- Facts Grid -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-zinc-50/50 rounded-lg p-4 border border-zinc-150 mt-4.5">
-                  <div>
-                    <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold block mb-0.5">Project Type</span>
-                    <span class="text-[11px] font-bold text-zinc-750 capitalize">{{ scopeStore.projectType.replace('_', ' ') }}</span>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-zinc-50/50 rounded-xl p-4.5 border border-zinc-150/80 mt-5">
+                  <div class="flex flex-col">
+                    <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
+                      <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                      </svg>
+                      Project Type
+                    </span>
+                    <span class="text-[11px] font-bold text-zinc-750 capitalize tracking-wide">{{ scopeStore.projectType.replace('_', ' ') }}</span>
                   </div>
-                  <div>
-                    <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold block mb-0.5">Industry Segment</span>
-                    <span class="text-[11px] font-bold text-zinc-750 truncate block">{{ scopeStore.industry || 'General Domain' }}</span>
+                  <div class="flex flex-col">
+                    <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
+                      <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="3" x2="9" y2="21"></line>
+                      </svg>
+                      Industry Domain
+                    </span>
+                    <span class="text-[11px] font-bold text-zinc-750 truncate tracking-wide">{{ scopeStore.industry || 'General Domain' }}</span>
                   </div>
-                  <div>
-                    <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold block mb-0.5">Budget Cap</span>
-                    <span class="text-[11px] font-bold text-zinc-750">{{ scopeStore.budgetUsd ? '$' + scopeStore.budgetUsd.toLocaleString() : 'Not Specified' }}</span>
+                  <div class="flex flex-col">
+                    <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
+                      <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                      </svg>
+                      Budget Cap
+                    </span>
+                    <span class="text-[11px] font-bold text-zinc-700 tracking-wide">{{ scopeStore.budgetUsd ? '$' + scopeStore.budgetUsd.toLocaleString() : 'Not Specified' }}</span>
                   </div>
-                  <div>
-                    <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold block mb-0.5">Target Platforms</span>
-                    <span class="text-[11px] font-bold text-zinc-750 capitalize">{{ scopeStore.platforms.join(', ') }}</span>
+                  <div class="flex flex-col">
+                    <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
+                      <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                        <line x1="7" y1="2" x2="7" y2="22"></line>
+                        <line x1="17" y1="2" x2="17" y2="22"></line>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                      </svg>
+                      Target Platforms
+                    </span>
+                    <span class="text-[11px] font-bold text-zinc-750 capitalize truncate tracking-wide">{{ scopeStore.platforms.join(', ') }}</span>
                   </div>
                 </div>
               </div>

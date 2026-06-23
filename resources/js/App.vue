@@ -71,40 +71,100 @@ const applyPreset = (p: typeof presets[0]) => {
 
 <template>
   <Toast />
-  
-  <!-- Premium horizontal progress bar (Linear style) -->
-  <div v-if="scopeStore.isInitiating || scopeStore.isStreaming" class="fixed top-0 left-0 right-0 h-[3px] z-[9999] overflow-hidden bg-zinc-100">
-    <div class="h-full bg-zinc-950 animate-progress origin-left"></div>
-  </div>
-
   <div class="min-h-screen bg-zinc-50/30 text-zinc-900 font-sans antialiased relative">
     <!-- Radial dot grid background (Linear/Vercel style) -->
     <div class="absolute inset-0 bg-[radial-gradient(rgba(0,0,0,0.04)_1px,transparent_0)] bg-[size:24px_24px] pointer-events-none z-0"></div>
 
     <!-- Sticky Navigation header -->
-    <nav class="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/80 backdrop-blur-md">
+    <nav class="sticky top-0 z-50 bg-white/70 backdrop-blur-md transition-all duration-300 border-b border-zinc-150/60 shadow-[0_2px_12px_rgba(9,9,11,0.015),0_1px_2px_rgba(9,9,11,0.01)]">
+      
+      <!-- Linear Progress Line integrated under the border -->
+      <div v-if="scopeStore.isInitiating || scopeStore.isStreaming" class="absolute bottom-0 left-0 right-0 h-[2px] overflow-hidden">
+        <div class="h-full w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 animate-progress origin-left"></div>
+      </div>
+
       <div class="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="h-7 w-7 rounded-md bg-zinc-950 flex items-center justify-center text-white shadow-sm ring-1 ring-zinc-900/10">
-            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <span class="text-sm font-semibold tracking-tight text-zinc-950">ScopeFlow<span class="text-zinc-400">.ai</span></span>
-          <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-zinc-100 text-zinc-600 border border-zinc-200">v1.0.0</span>
-        </div>
         
-        <div class="flex items-center gap-4">
-          <span class="hidden sm:flex items-center gap-1.5 text-xs text-zinc-500 font-medium">
-            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Agent Engine Active
-          </span>
-          <a href="https://github.com" target="_blank" class="text-zinc-400 hover:text-zinc-600 transition-colors">
-            <i class="pi pi-github text-sm"></i>
-          </a>
+        <!-- Left Side: Brand & Search -->
+        <div class="flex items-center gap-6">
+          <!-- Brand Identity -->
+          <div class="flex items-center gap-3 select-none cursor-pointer group">
+            <div class="relative flex items-center justify-center h-8.5 w-8.5 rounded-lg bg-white shadow-xs border border-zinc-200/80 overflow-hidden group-hover:border-zinc-300 transition-all duration-200">
+              <!-- Geometric Isometric Cube SVG Logo -->
+              <svg class="h-4.5 w-4.5 text-zinc-950 group-hover:text-indigo-600 transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" />
+              </svg>
+              <!-- Ambient gradient overlay -->
+              <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            </div>
+            
+            <div class="flex flex-col">
+              <div class="flex items-center gap-1.5 leading-none">
+                <span class="text-[13.5px] font-extrabold tracking-tight text-zinc-950">ScopeFlow</span>
+                <span class="text-[8.5px] font-extrabold uppercase tracking-wider px-1.5 py-0.2 rounded-md bg-zinc-950 text-white shadow-xs">AI</span>
+              </div>
+              <span class="text-[9.5px] text-zinc-400 font-semibold tracking-wider uppercase mt-0.5">Project Architect</span>
+            </div>
+          </div>
+
+          <!-- Vertical Divider -->
+          <div class="hidden sm:block h-4 w-px bg-zinc-200"></div>
+
+          <!-- Mock Command Search Bar -->
+          <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50/50 hover:bg-zinc-50 border border-zinc-200/50 hover:border-zinc-200 cursor-pointer transition-all duration-150 w-52 justify-between select-none">
+            <span class="text-[11px] text-zinc-400 font-medium flex items-center gap-2">
+              <svg class="h-3.5 w-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              Search or ask...
+            </span>
+            <kbd class="text-[9px] font-bold text-zinc-400 bg-white border border-zinc-200 rounded px-1.5 py-0.2 shadow-3xs font-mono">⌘K</kbd>
+          </div>
         </div>
+
+        <!-- Center / Right: Nav items -->
+        <div class="flex items-center gap-6">
+          <div class="hidden md:flex items-center gap-1.5 select-none">
+            <a href="#" class="text-xs font-semibold px-3 py-1.5 rounded-md bg-zinc-900 text-white transition-all duration-200 shadow-sm border border-transparent">
+              Scope Builder
+            </a>
+            <a href="#" class="text-xs font-medium px-3 py-1.5 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 transition-all duration-200 border border-transparent">
+              Templates
+            </a>
+            <a href="#" class="text-xs font-medium px-3 py-1.5 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 transition-all duration-200 border border-transparent">
+              Saved Blueprints
+            </a>
+          </div>
+
+          <!-- Vertical Divider -->
+          <div class="hidden md:block h-4 w-px bg-zinc-200"></div>
+
+          <!-- Right Navigation Elements -->
+          <div class="flex items-center gap-3">
+            <!-- Active engine badge -->
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50/50 text-emerald-800 border border-emerald-100 text-[10px] font-bold tracking-wider uppercase select-none">
+              <span class="relative flex h-1.5 w-1.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+              </span>
+              Engine Active
+            </span>
+            
+            <!-- User Profile Avatar Mockup -->
+            <div class="relative h-7.5 w-7.5 rounded-full overflow-hidden border border-zinc-200/80 shadow-2xs hover:scale-105 transition-all duration-200 cursor-pointer">
+              <!-- Dynamic Gradient Avatar -->
+              <div class="h-full w-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-[10px] font-bold text-white tracking-wider select-none">
+                SF
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </nav>
+
 
     <main class="relative z-10">
       <transition name="layout" mode="out-in">
