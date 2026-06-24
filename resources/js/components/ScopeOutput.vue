@@ -76,6 +76,8 @@ const parseMarkdown = (text: string, step: number): string => {
   const lines = text.split('\n')
   let inList = false
   let inTable = false
+  let inRationale = false
+  const rationaleLines: string[] = []
   const result: string[] = []
 
   const closeList = () => {
@@ -97,6 +99,11 @@ const parseMarkdown = (text: string, step: number): string => {
 
     // Skip code block wrappers (e.g., ```markdown)
     if (trimmed.startsWith('```')) {
+      continue
+    }
+
+    if (step === 1 && inRationale) {
+      rationaleLines.push(line)
       continue
     }
 
@@ -145,12 +152,12 @@ const parseMarkdown = (text: string, step: number): string => {
     if (step === 1 && trimmed.startsWith('Classification:')) {
       const rawValue = trimmed.replace('Classification:', '').trim()
       let classificationVal = rawValue
-      let rationaleVal = ''
+      let inlineRationale = ''
       
       if (rawValue.includes('Rationale:')) {
         const parts = rawValue.split('Rationale:')
         classificationVal = parts[0].trim()
-        rationaleVal = parts[1].trim()
+        inlineRationale = parts[1].trim()
       }
       
       const parsedClassification = parseInline(classificationVal)
@@ -176,26 +183,20 @@ const parseMarkdown = (text: string, step: number): string => {
         </div>
       `)
       
-      if (rationaleVal) {
-        result.push(`
-          <div class="rationale-card">
-            <span class="rationale-label">Architecture Rationale</span>
-            <p class="rationale-text">${parseInline(rationaleVal)}</p>
-          </div>
-        `)
+      if (inlineRationale) {
+        rationaleLines.push(inlineRationale)
+        inRationale = true
       }
       continue
     }
 
-    // Step 1 special layout: Rationale block
+    // Step 1 special layout: Rationale block header
     if (step === 1 && trimmed.startsWith('Rationale:')) {
       const val = trimmed.replace('Rationale:', '').trim()
-      result.push(`
-        <div class="rationale-card">
-          <span class="rationale-label">Architecture Rationale</span>
-          <p class="rationale-text">${parseInline(val)}</p>
-        </div>
-      `)
+      if (val) {
+        rationaleLines.push(val)
+      }
+      inRationale = true
       continue
     }
 
@@ -266,6 +267,16 @@ const parseMarkdown = (text: string, step: number): string => {
 
   closeList()
   closeTable()
+
+  if (step === 1 && rationaleLines.length > 0) {
+    const parsedRationale = parseMarkdown(rationaleLines.join('\n'), 0)
+    result.push(`
+      <div class="rationale-card">
+        <span class="rationale-label">Architecture Rationale</span>
+        <div class="rationale-text">${parsedRationale}</div>
+      </div>
+    `)
+  }
 
   return result.join('\n')
 }
