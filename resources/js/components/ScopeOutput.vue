@@ -95,6 +95,11 @@ const parseMarkdown = (text: string, step: number): string => {
   for (const line of lines) {
     const trimmed = line.trim()
 
+    // Skip code block wrappers (e.g., ```markdown)
+    if (trimmed.startsWith('```')) {
+      continue
+    }
+
     // Table parser
     if (trimmed.startsWith('|')) {
       closeList()
@@ -1047,7 +1052,6 @@ watch(() => scopeStore.isStreaming, (streaming) => {
   padding: 1.25rem;
   background-color: #fafafa;
   border: 1px solid #e4e4e7;
-  border-left: 4px solid #09090b;
   border-radius: 12px;
   margin-top: 1.25rem;
   margin-bottom: 1.5rem;
@@ -1098,6 +1102,8 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 
 :deep(.risk-card .risk-badge), :deep(.risk-card .mitigation-badge) {
   flex-shrink: 0;
+  width: 5.8rem;
+  text-align: center;
   font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
