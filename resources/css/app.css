@@ -47,6 +47,7 @@ body {
 .p-inputtext:focus,
 .p-dropdown:focus,
 .p-textarea:focus,
+.p-datepicker:focus-within,
 .p-inputtext:focus-within {
     border-color: #18181b !important;
     box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.05) !important;
@@ -76,3 +77,15 @@ body {
 .p-card .p-card-body { padding: 0 !important; }
 .p-card .p-card-title { padding: 0 !important; margin: 0 !important; }
 .p-card .p-card-content { padding: 0 !important; }
+
+/* DatePicker input nesting and double-border fix */
+.p-datepicker .p-inputtext {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.p-datepicker .p-datepicker-input {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}

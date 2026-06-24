@@ -71,24 +71,18 @@ const applyPreset = (p: typeof presets[0]) => {
 
 <template>
   <Toast />
-  <div class="min-h-screen bg-zinc-50/30 text-zinc-900 font-sans antialiased relative">
+  <div class="h-screen flex flex-col bg-zinc-50/30 text-zinc-900 font-sans antialiased relative overflow-hidden">
     <!-- Radial dot grid background (Linear/Vercel style) -->
-    <div class="absolute inset-0 bg-[radial-gradient(rgba(0,0,0,0.04)_1px,transparent_0)] bg-[size:24px_24px] pointer-events-none z-0"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(rgba(0,0,0,0.03)_1px,transparent_0)] bg-[size:24px_24px] pointer-events-none z-0"></div>
 
     <!-- Sticky Navigation header -->
-    <nav class="sticky top-0 z-50 bg-white/70 backdrop-blur-md transition-all duration-300 border-b border-zinc-150/60 shadow-[0_2px_12px_rgba(9,9,11,0.015),0_1px_2px_rgba(9,9,11,0.01)]">
-      
-      <!-- Linear Progress Line integrated under the border -->
-      <div v-if="scopeStore.isInitiating || scopeStore.isStreaming" class="absolute bottom-0 left-0 right-0 h-[2px] overflow-hidden">
-        <div class="h-full w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 animate-progress origin-left"></div>
-      </div>
-
-      <div class="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between">
+    <nav class="shrink-0 h-14 bg-white/70 backdrop-blur-md transition-all duration-300 border-b border-transparent shadow-[0_2px_12px_rgba(9,9,11,0.005),0_1px_2px_rgba(9,9,11,0.003)]">
+      <div class="mx-auto max-w-7xl px-6 h-full flex items-center justify-between">
         
         <!-- Left Side: Brand & Search -->
         <div class="flex items-center gap-6">
           <!-- Brand Identity -->
-          <div class="flex items-center gap-3 select-none cursor-pointer group">
+          <div class="flex items-center gap-3 select-none cursor-pointer group" @click="scopeStore.reset">
             <div class="relative flex items-center justify-center h-8.5 w-8.5 rounded-lg bg-white shadow-xs border border-zinc-200/80 overflow-hidden group-hover:border-zinc-300 transition-all duration-200">
               <!-- Geometric Isometric Cube SVG Logo -->
               <svg class="h-4.5 w-4.5 text-zinc-950 group-hover:text-indigo-600 transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -104,7 +98,7 @@ const applyPreset = (p: typeof presets[0]) => {
                 <span class="text-[13.5px] font-extrabold tracking-tight text-zinc-950">ScopeFlow</span>
                 <span class="text-[8.5px] font-extrabold uppercase tracking-wider px-1.5 py-0.2 rounded-md bg-zinc-950 text-white shadow-xs">AI</span>
               </div>
-              <span class="text-[9.5px] text-zinc-400 font-semibold tracking-wider uppercase mt-0.5">Project Architect</span>
+              <span class="text-[9.5px] text-zinc-450 font-semibold tracking-wider uppercase mt-0.5">Project Architect</span>
             </div>
           </div>
 
@@ -112,9 +106,9 @@ const applyPreset = (p: typeof presets[0]) => {
           <div class="hidden sm:block h-4 w-px bg-zinc-200"></div>
 
           <!-- Mock Command Search Bar -->
-          <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50/50 hover:bg-zinc-50 border border-zinc-200/50 hover:border-zinc-200 cursor-pointer transition-all duration-150 w-52 justify-between select-none">
-            <span class="text-[11px] text-zinc-400 font-medium flex items-center gap-2">
-              <svg class="h-3.5 w-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50/50 hover:bg-zinc-50 border border-zinc-200/50 hover:border-zinc-200 active:scale-[0.98] cursor-pointer transition-all duration-150 w-52 justify-between select-none">
+            <span class="text-[11px] text-zinc-450 font-medium flex items-center gap-2">
+              <svg class="h-3.5 w-3.5 text-zinc-450" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
@@ -127,13 +121,13 @@ const applyPreset = (p: typeof presets[0]) => {
         <!-- Center / Right: Nav items -->
         <div class="flex items-center gap-6">
           <div class="hidden md:flex items-center gap-1.5 select-none">
-            <a href="#" class="text-xs font-semibold px-3 py-1.5 rounded-md bg-zinc-900 text-white transition-all duration-200 shadow-sm border border-transparent">
+            <a href="#" class="text-xs font-semibold px-3 py-1.5 rounded-md bg-zinc-900 hover:bg-zinc-800 text-white transition-all duration-200 shadow-sm border border-transparent active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2">
               Scope Builder
             </a>
-            <a href="#" class="text-xs font-medium px-3 py-1.5 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 transition-all duration-200 border border-transparent">
+            <a href="#" class="text-xs font-medium px-3 py-1.5 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 transition-all duration-200 border border-transparent active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2">
               Templates
             </a>
-            <a href="#" class="text-xs font-medium px-3 py-1.5 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 transition-all duration-200 border border-transparent">
+            <a href="#" class="text-xs font-medium px-3 py-1.5 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 transition-all duration-200 border border-transparent active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2">
               Saved Blueprints
             </a>
           </div>
@@ -144,7 +138,7 @@ const applyPreset = (p: typeof presets[0]) => {
           <!-- Right Navigation Elements -->
           <div class="flex items-center gap-3">
             <!-- Active engine badge -->
-            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50/50 text-emerald-800 border border-emerald-100 text-[10px] font-bold tracking-wider uppercase select-none">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50/50 text-emerald-800 border border-emerald-100/80 text-[10px] font-bold tracking-wider uppercase select-none">
               <span class="relative flex h-1.5 w-1.5">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
@@ -166,11 +160,11 @@ const applyPreset = (p: typeof presets[0]) => {
     </nav>
 
 
-    <main class="relative z-10">
+    <main class="flex-grow overflow-hidden relative z-10 flex flex-col">
       <transition name="layout" mode="out-in">
 
         <!-- Onboarding & Landing Screen -->
-        <div v-if="!hasStarted" key="landing" class="flex flex-col items-center justify-center min-h-[calc(100vh-56px)] py-12 px-6">
+        <div v-if="!hasStarted" key="landing" class="flex-grow overflow-y-auto flex flex-col items-center justify-start py-12 px-6">
           <div class="w-full max-w-3xl flex flex-col gap-10">
             
             <header class="text-center flex flex-col items-center gap-3">
@@ -196,7 +190,7 @@ const applyPreset = (p: typeof presets[0]) => {
                   v-for="p in presets"
                   :key="p.title"
                   type="button"
-                  class="group text-left p-4 rounded-xl border border-zinc-200 bg-white hover:border-zinc-900/80 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between"
+                  class="group text-left p-4 rounded-xl border border-zinc-200 bg-white hover:border-zinc-900/80 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 cursor-pointer transition-all duration-200 shadow-sm flex flex-col justify-between"
                   @click="applyPreset(p)"
                 >
                   <div>
@@ -211,41 +205,41 @@ const applyPreset = (p: typeof presets[0]) => {
                   
                   <!-- Preset attributes -->
                   <div class="flex items-center gap-1.5 flex-wrap pt-2 border-t border-zinc-100">
-                    <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200">${{ (p.budgetUsd / 1000) }}k</span>
-                    <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200 capitalize">{{ p.platforms[0] }}</span>
+                    <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-650 border border-zinc-200">${{ (p.budgetUsd / 1000) }}k</span>
+                    <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-650 border border-zinc-200 capitalize">{{ p.platforms[0] }}</span>
                   </div>
                 </button>
               </div>
             </div>
 
             <!-- Form Container -->
-            <div class="bg-white rounded-xl border border-zinc-200/80 shadow-md p-6 sm:p-8">
-              <DiscoveryForm />
-            </div>
+            <DiscoveryForm />
 
           </div>
         </div>
 
         <!-- Main Workspace (Form + Output) -->
-        <div v-else key="workspace" class="mx-auto max-w-7xl px-6 py-8">
-          <div class="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
+        <div v-else key="workspace" class="flex-grow overflow-hidden mx-auto w-full max-w-7xl px-6 py-6 flex flex-col">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch overflow-hidden h-full flex-grow">
             
             <!-- Sticky Sidebar form configuration -->
-            <aside class="lg:col-span-4 flex flex-col gap-4 lg:sticky lg:top-[76px] max-h-[calc(100vh-110px)] overflow-y-auto pr-1">
-              <div class="flex items-center justify-between">
+            <aside class="lg:col-span-4 flex flex-col gap-4 h-full overflow-hidden">
+              <div class="flex items-center justify-between shrink-0">
                 <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Parameters</span>
                 <button
-                  class="rounded-md border border-zinc-200 hover:border-zinc-950 bg-white hover:bg-zinc-50 text-zinc-900 text-xs font-semibold py-1.5 px-3 cursor-pointer transition-colors shadow-sm"
+                  class="rounded-md border border-zinc-200 hover:border-zinc-950 bg-white hover:bg-zinc-50 text-zinc-900 text-xs font-semibold py-1.5 px-3 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 cursor-pointer transition-all duration-150 shadow-sm"
                   @click="scopeStore.reset"
                 >
                   New Document
                 </button>
               </div>
-              <DiscoveryForm is-sidebar />
+              <div class="flex-grow overflow-y-auto pr-1">
+                <DiscoveryForm is-sidebar />
+              </div>
             </aside>
 
             <!-- Main output report viewer -->
-            <div class="lg:col-span-8">
+            <div class="lg:col-span-8 h-full flex flex-col overflow-hidden">
               <ScopeOutput />
             </div>
 

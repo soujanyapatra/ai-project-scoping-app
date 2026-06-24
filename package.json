@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "concurrently -k -n laravel,vite -c blue,green \"php artisan serve --host=0.0.0.0 --port=8000\" \"vite --host=localhost --strictPort --port=5174\"",
+        "dev": "concurrently -k -n laravel,vite -c blue,green \"php artisan serve --host=0.0.0.0 --port=8000\" \"vite --host=localhost\"",
         "dev:vite": "vite",
         "build": "vite build",
         "preview": "vite preview"

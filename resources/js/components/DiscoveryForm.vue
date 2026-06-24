@@ -96,7 +96,7 @@ const onReset = () => {
 <template>
   <div :class="[
     'rounded-xl border border-zinc-200 bg-white transition-all duration-200',
-    isSidebar ? 'border-none bg-transparent' : 'shadow-sm overflow-hidden'
+    isSidebar ? 'border-none bg-transparent' : 'shadow-md overflow-hidden'
   ]">
     <!-- Header (landing only) -->
     <div v-if="!isSidebar" class="px-6 py-4.5 border-b border-zinc-100 flex items-center justify-between">
@@ -126,37 +126,49 @@ const onReset = () => {
             <div class="flex flex-col gap-1.5">
               <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.projectType') }}</span>
               <Dropdown v-model="scopeStore.projectType" :options="projectTypeOptions" optionLabel="label" optionValue="value" :invalid="!!formErrors.projectType" class="w-full" />
-              <small v-if="formErrors.projectType" class="text-xs text-red-500">{{ formErrors.projectType }}</small>
+              <transition name="form-error">
+                <small v-if="formErrors.projectType" class="text-xs text-red-500">{{ formErrors.projectType }}</small>
+              </transition>
             </div>
 
             <div class="flex flex-col gap-1.5">
               <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.industry') }}</span>
               <InputText v-model="scopeStore.industry" :invalid="!!formErrors.industry" class="w-full" placeholder="e.g. Healthcare, Fintech, SaaS" />
-              <small v-if="formErrors.industry" class="text-xs text-red-500">{{ formErrors.industry }}</small>
+              <transition name="form-error">
+                <small v-if="formErrors.industry" class="text-xs text-red-500">{{ formErrors.industry }}</small>
+              </transition>
             </div>
 
             <div class="flex flex-col gap-1.5">
               <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.budgetUsd') }}</span>
               <InputNumber v-model="scopeStore.budgetUsd" :min="0" mode="currency" currency="USD" locale="en-US" :invalid="!!formErrors.budgetUsd" class="w-full" placeholder="$0.00" />
-              <small v-if="formErrors.budgetUsd" class="text-xs text-red-500">{{ formErrors.budgetUsd }}</small>
+              <transition name="form-error">
+                <small v-if="formErrors.budgetUsd" class="text-xs text-red-500">{{ formErrors.budgetUsd }}</small>
+              </transition>
             </div>
 
             <div class="flex flex-col gap-1.5">
               <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.platforms') }}</span>
               <MultiSelect v-model="scopeStore.platforms" :options="platformOptions" optionLabel="label" optionValue="value" display="chip" :invalid="!!formErrors.platforms" class="w-full" />
-              <small v-if="formErrors.platforms" class="text-xs text-red-500">{{ formErrors.platforms }}</small>
+              <transition name="form-error">
+                <small v-if="formErrors.platforms" class="text-xs text-red-500">{{ formErrors.platforms }}</small>
+              </transition>
             </div>
 
             <div class="flex flex-col gap-1.5">
               <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.timelineStart') }}</span>
               <DatePicker v-model="scopeStore.timelineStart" showIcon :invalid="!!formErrors.timelineStart" class="w-full" placeholder="Select start date" />
-              <small v-if="formErrors.timelineStart" class="text-xs text-red-500">{{ formErrors.timelineStart }}</small>
+              <transition name="form-error">
+                <small v-if="formErrors.timelineStart" class="text-xs text-red-500">{{ formErrors.timelineStart }}</small>
+              </transition>
             </div>
 
             <div class="flex flex-col gap-1.5">
               <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.timelineEnd') }}</span>
               <DatePicker v-model="scopeStore.timelineEnd" showIcon :invalid="!!formErrors.timelineEnd" class="w-full" placeholder="Select end date" />
-              <small v-if="formErrors.timelineEnd" class="text-xs text-red-500">{{ formErrors.timelineEnd }}</small>
+              <transition name="form-error">
+                <small v-if="formErrors.timelineEnd" class="text-xs text-red-500">{{ formErrors.timelineEnd }}</small>
+              </transition>
             </div>
           </fieldset>
         </div>
@@ -176,7 +188,9 @@ const onReset = () => {
               <Chips v-model="scopeStore.features" :invalid="!!formErrors.features" class="w-full" placeholder="Type and press Enter..." />
               <div class="flex justify-between items-center mt-1">
                 <small class="text-[10px] text-zinc-400">{{ t('discovery.featuresHint') }}</small>
-                <small v-if="formErrors.features" class="text-xs text-red-500">{{ formErrors.features }}</small>
+                <transition name="form-error">
+                  <small v-if="formErrors.features" class="text-xs text-red-500">{{ formErrors.features }}</small>
+                </transition>
               </div>
             </div>
 
@@ -201,7 +215,7 @@ const onReset = () => {
         <footer class="flex justify-end gap-2.5 border-t border-zinc-150 pt-4 mt-2">
           <button
             type="button"
-            class="rounded-lg text-[13px] font-semibold py-2 px-4 text-zinc-700 border border-zinc-200 bg-white hover:bg-zinc-50 hover:text-zinc-900 cursor-pointer transition-all duration-150 disabled:opacity-40"
+            class="rounded-lg text-[13px] font-semibold py-2 px-4 text-zinc-700 border border-zinc-200 bg-white hover:bg-zinc-50 hover:text-zinc-900 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 cursor-pointer transition-all duration-150 disabled:opacity-40"
             :disabled="scopeStore.isInitiating || scopeStore.isStreaming"
             @click="onReset"
           >
@@ -211,7 +225,7 @@ const onReset = () => {
           <button
             type="submit"
             :disabled="!canSubmit"
-            class="rounded-lg bg-zinc-950 hover:bg-zinc-900 text-white text-[13px] font-semibold py-2 px-4.5 border-none cursor-pointer transition-all duration-150 disabled:opacity-40 shadow-sm flex items-center gap-2"
+            class="rounded-lg bg-zinc-950 hover:bg-zinc-900 text-white text-[13px] font-semibold py-2 px-4.5 border-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 cursor-pointer transition-all duration-150 disabled:opacity-40 shadow-sm flex items-center gap-2"
           >
             <i v-if="scopeStore.isInitiating" class="pi pi-spin pi-spinner text-xs"></i>
             {{ scopeStore.isInitiating ? 'Analyzing...' : t('discovery.submit') }}
@@ -221,3 +235,61 @@ const onReset = () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Transition & Micro-interactions for PrimeVue Form Controls */
+:deep(.p-dropdown),
+:deep(.p-multiselect),
+:deep(.p-datepicker),
+:deep(.p-inputtext),
+:deep(.p-chips),
+:deep(.p-textarea) {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  border-radius: 8px !important;
+}
+
+:deep(.p-dropdown:hover),
+:deep(.p-multiselect:hover),
+:deep(.p-datepicker:hover),
+:deep(.p-inputtext:hover),
+:deep(.p-chips:hover),
+:deep(.p-textarea:hover) {
+  border-color: #011268 !important; /* Brand 600 color */
+}
+
+:deep(.p-dropdown:focus-within),
+:deep(.p-multiselect:focus-within),
+:deep(.p-datepicker:focus-within),
+:deep(.p-inputtext:focus),
+:deep(.p-chips:focus-within),
+:deep(.p-textarea:focus) {
+  border-color: #011268 !important;
+  box-shadow: 0 0 0 3px rgba(1, 18, 104, 0.1) !important;
+}
+
+/* Invalid State Animation */
+:deep(.p-invalid) {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Form error message transition */
+.form-error-enter-active,
+.form-error-leave-active {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 24px;
+}
+.form-error-enter-from,
+.form-error-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-4px);
+}
+</style>

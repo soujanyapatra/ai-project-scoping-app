@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useScopeStore } from '@/stores/useScopeStore'
 import { useAppToast } from '@/composables/useAppToast'
@@ -16,6 +16,7 @@ const isCopied = ref(false)
 const activeTab = ref(1)
 const viewMode = ref<'steps' | 'full' | 'editor'>('steps')
 const fullMarkdownText = ref('')
+const scrollContainer = ref<HTMLElement | null>(null)
 
 // 7. Computed
 const step1Status = computed(() => {
@@ -65,8 +66,9 @@ const parseInline = (text: string): string => {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/&lt;br\s*\/?&gt;/gi, '<br />')
-    .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #09090b;">$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em style="font-style: italic; color: #27272a;">$1</em>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/`(.*?)`/g, '<code class="scope-inline-code">$1</code>')
 }
 
 const parseMarkdown = (text: string, step: number): string => {
@@ -97,7 +99,7 @@ const parseMarkdown = (text: string, step: number): string => {
     if (trimmed.startsWith('|')) {
       closeList()
       if (!inTable) {
-        result.push('<div style="overflow-x: auto; margin: 16px 0; border: 1px solid #e4e4e7; border-radius: 8px;"><table style="width: 100%; border-collapse: collapse; font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; font-size: 13px; text-align: left;">')
+        result.push('<div class="table-container"><table class="scope-table">')
         inTable = true
       }
       
@@ -107,19 +109,18 @@ const parseMarkdown = (text: string, step: number): string => {
       }
       
       const cells = trimmed.split('|').slice(1, -1).map(c => c.trim())
-      // Check if we already have a tbody started
       const hasTableBody = result.some(r => r.includes('<tbody'))
       
       if (!hasTableBody) {
-        result.push('<thead style="background-color: #f8f8f9;"><tr>')
+        result.push('<thead><tr>')
         cells.forEach(cell => {
-          result.push(`<th style="padding: 10px 12px; font-weight: bold; color: #71717a; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e4e4e7;">${parseInline(cell)}</th>`)
+          result.push(`<th>${parseInline(cell)}</th>`)
         })
-        result.push('</tr></thead><tbody style="background-color: #ffffff;">')
+        result.push('</tr></thead><tbody>')
       } else {
         result.push('<tr>')
         cells.forEach(cell => {
-          result.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #e4e4e7; color: #3f3f46; vertical-align: top; line-height: 1.5;">${parseInline(cell)}</td>`)
+          result.push(`<td>${parseInline(cell)}</td>`)
         })
         result.push('</tr>')
       }
@@ -131,34 +132,53 @@ const parseMarkdown = (text: string, step: number): string => {
     // Horizontal Rule parser
     if (trimmed.match(/^---+$/) || trimmed.match(/^\*\*\*+$/)) {
       closeList()
-      result.push('<hr style="border: 0; border-top: 1px solid #e4e4e7; margin: 24px 0;" />')
+      result.push('<hr />')
       continue
     }
 
     // Step 1 special layout: Classification pill
     if (step === 1 && trimmed.startsWith('Classification:')) {
-      const value = parseInline(trimmed.replace('Classification:', '').trim())
-      let severityClass = 'background-color: #fafafa; color: #18181b; border-color: #e4e4e7;'
-      let icon = 'pi-info-circle'
-      if (value.toLowerCase().includes('low')) {
-        severityClass = 'background-color: #fafafa; color: #18181b; border-color: #e4e4e7;'
+      const rawValue = trimmed.replace('Classification:', '').trim()
+      let classificationVal = rawValue
+      let rationaleVal = ''
+      
+      if (rawValue.includes('Rationale:')) {
+        const parts = rawValue.split('Rationale:')
+        classificationVal = parts[0].trim()
+        rationaleVal = parts[1].trim()
+      }
+      
+      const parsedClassification = parseInline(classificationVal)
+      let severityClass = 'classification-low'
+      let icon = 'pi-shield'
+      if (classificationVal.toLowerCase().includes('low')) {
+        severityClass = 'classification-low'
         icon = 'pi-shield'
-      } else if (value.toLowerCase().includes('medium-high') || value.toLowerCase().includes('high')) {
-        severityClass = 'background-color: #09090b; color: #fafafa; border-color: #09090b;'
+      } else if (classificationVal.toLowerCase().includes('medium-high') || classificationVal.toLowerCase().includes('high')) {
+        severityClass = 'classification-high'
         icon = 'pi-fire'
-      } else if (value.toLowerCase().includes('medium')) {
-        severityClass = 'background-color: #18181b; color: #f4f4f5; border-color: #27272a;'
+      } else if (classificationVal.toLowerCase().includes('medium')) {
+        severityClass = 'classification-medium'
         icon = 'pi-exclamation-triangle'
       }
       result.push(`
-        <div style="margin-bottom: 16px; padding: 16px; border: 1px solid #e4e4e7; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; ${severityClass}">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <i class="pi ${icon}" style="font-size: 14px;"></i>
-            <span style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Complexity Classification</span>
+        <div class="classification-card ${severityClass}">
+          <div class="card-label">
+            <i class="pi ${icon}"></i>
+            <span>Complexity Classification</span>
           </div>
-          <span style="font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px; border: 1px solid #e4e4e7; background-color: #ffffff; color: #18181b;">${value}</span>
+          <span class="card-value">${parsedClassification}</span>
         </div>
       `)
+      
+      if (rationaleVal) {
+        result.push(`
+          <div class="rationale-card">
+            <span class="rationale-label">Architecture Rationale</span>
+            <p class="rationale-text">${parseInline(rationaleVal)}</p>
+          </div>
+        `)
+      }
       continue
     }
 
@@ -166,9 +186,9 @@ const parseMarkdown = (text: string, step: number): string => {
     if (step === 1 && trimmed.startsWith('Rationale:')) {
       const val = trimmed.replace('Rationale:', '').trim()
       result.push(`
-        <div style="padding: 16px; background-color: #fafafa; border: 1px solid #e4e4e7; border-left: 4px solid #09090b; border-radius: 8px; margin-top: 12px;">
-          <span style="display: block; font-size: 10px; font-weight: 700; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Architecture Rationale</span>
-          <p style="color: #3f3f46; font-size: 14px; line-height: 1.6; margin: 0;">${parseInline(val)}</p>
+        <div class="rationale-card">
+          <span class="rationale-label">Architecture Rationale</span>
+          <p class="rationale-text">${parseInline(val)}</p>
         </div>
       `)
       continue
@@ -189,18 +209,14 @@ const parseMarkdown = (text: string, step: number): string => {
         
         if (riskText || mitigationText) {
           result.push(`
-            <div style="margin-bottom: 16px; padding: 16px; border: 1px solid #e4e4e7; background-color: #ffffff; border-radius: 8px; display: flex; flex-direction: column; gap: 10px;">
-              <div style="display: flex; align-items: start; gap: 8px;">
-                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background-color: #f4f4f5; color: #18181b; border: 1px solid #e4e4e7; margin-top: 2px;">
-                  Risk
-                </span>
-                <p style="font-size: 13px; font-weight: 600; color: #27272a; line-height: 1.5; margin: 0;">${parseInline(riskText)}</p>
+            <div class="risk-card">
+              <div class="risk-row">
+                <span class="risk-badge">Risk</span>
+                <p class="risk-text">${parseInline(riskText)}</p>
               </div>
-              <div style="display: flex; align-items: start; gap: 8px; border-top: 1px solid #f4f4f5; padding-top: 10px;">
-                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background-color: #09090b; color: #ffffff; border: 1px solid #09090b; margin-top: 2px;">
-                  Mitigation
-                </span>
-                <p style="font-size: 13px; color: #52525b; line-height: 1.5; margin: 0;">${parseInline(mitigationText)}</p>
+              <div class="mitigation-row">
+                <span class="mitigation-badge">Mitigation</span>
+                <p class="mitigation-text">${parseInline(mitigationText)}</p>
               </div>
             </div>
           `)
@@ -212,10 +228,10 @@ const parseMarkdown = (text: string, step: number): string => {
     // Default lists
     if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
       if (!inList) {
-        result.push('<ul style="list-style-type: disc; padding-left: 20px; margin: 12px 0 12px 0;">')
+        result.push('<ul>')
         inList = true
       }
-      result.push(`<li style="margin-bottom: 6px; line-height: 1.6; color: #3f3f46; font-size: 13.5px;">${parseInline(trimmed.substring(2))}</li>`)
+      result.push(`<li>${parseInline(trimmed.substring(2))}</li>`)
       continue
     } else {
       closeList()
@@ -227,11 +243,11 @@ const parseMarkdown = (text: string, step: number): string => {
       const level = headerMatch[1].length
       const content = headerMatch[2]
       if (level === 1) {
-        result.push(`<h2 style="font-size: 18px; font-weight: 700; color: #09090b; margin-top: 24px; margin-bottom: 12px;">${parseInline(content)}</h2>`)
+        result.push(`<h2>${parseInline(content)}</h2>`)
       } else if (level === 2) {
-        result.push(`<h3 style="font-size: 14px; font-weight: 600; color: #18181b; margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid #f4f4f5; padding-bottom: 6px;">${parseInline(content)}</h3>`)
+        result.push(`<h3>${parseInline(content)}</h3>`)
       } else {
-        result.push(`<h4 style="font-size: 11px; font-weight: 700; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 16px; margin-bottom: 8px;">${parseInline(content)}</h4>`)
+        result.push(`<h4>${parseInline(content)}</h4>`)
       }
       continue
     }
@@ -239,7 +255,7 @@ const parseMarkdown = (text: string, step: number): string => {
     if (trimmed === '') {
       continue
     } else {
-      result.push(`<p style="color: #3f3f46; font-size: 13.5px; line-height: 1.6; margin-bottom: 12px;">${parseInline(trimmed)}</p>`)
+      result.push(`<p>${parseInline(trimmed)}</p>`)
     }
   }
 
@@ -425,12 +441,33 @@ const saveEditorChanges = () => {
   showSuccess('Changes saved and synced back successfully!')
 }
 
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (scrollContainer.value) {
+      scrollContainer.value.scrollTo({
+        top: scrollContainer.value.scrollHeight,
+        behavior: 'smooth'
+      })
+    }
+  })
+}
+
 // 9. Watchers
 watch(viewMode, (newVal) => {
   if (newVal === 'editor') {
     fullMarkdownText.value = getFullMarkdown()
   }
+  // Scroll to bottom on mode change if streaming
+  if (scopeStore.isStreaming) {
+    scrollToBottom()
+  }
 })
+
+watch(() => scopeStore.sections, () => {
+  if (scopeStore.isStreaming) {
+    scrollToBottom()
+  }
+}, { deep: true })
 
 watch(() => scopeStore.sections.length, (newLength) => {
   if (newLength > 0 && scopeStore.isStreaming) {
@@ -445,12 +482,13 @@ watch(() => scopeStore.sections.length, (newLength) => {
 watch(() => scopeStore.isStreaming, (streaming) => {
   if (streaming && scopeStore.sections.length > 0) {
     activeTab.value = scopeStore.sections[scopeStore.sections.length - 1].step
+    scrollToBottom()
   }
 })
 </script>
 
 <template>
-  <div class="rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm">
+  <div class="rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm h-full flex flex-col">
 
     <!-- Header -->
     <div class="px-6 py-4.5 border-b border-zinc-100 flex items-center justify-between">
@@ -471,11 +509,11 @@ watch(() => scopeStore.isStreaming, (streaming) => {
     </div>
 
     <!-- Body -->
-    <div class="p-6">
-      <section aria-live="polite" class="flex flex-col gap-5">
+    <div class="p-6 flex-grow overflow-hidden flex flex-col">
+      <section aria-live="polite" class="flex-grow overflow-hidden flex flex-col gap-5">
 
         <!-- Error State -->
-        <div v-if="scopeStore.streamError" class="p-4 bg-red-50 border border-red-200/80 rounded-lg text-xs text-red-800 flex items-start gap-2.5">
+        <div v-if="scopeStore.streamError" class="shrink-0 p-4 bg-red-50 border border-red-200/80 rounded-lg text-xs text-red-800 flex items-start gap-2.5">
           <i class="pi pi-exclamation-circle text-red-500 mt-0.5"></i>
           <div class="flex-grow">
             <span class="font-bold block">Generation Failed</span>
@@ -483,32 +521,34 @@ watch(() => scopeStore.isStreaming, (streaming) => {
           </div>
         </div>
 
-        <!-- Skeleton / Loading State -->
-        <div v-else-if="scopeStore.isInitiating && scopeStore.sections.length === 0" class="flex flex-col gap-6 py-4">
+        <!-- Skeleton / Loading State (Shimmering) -->
+        <div v-else-if="scopeStore.isInitiating && scopeStore.sections.length === 0" class="flex-grow flex flex-col gap-6 py-4 overflow-y-auto">
           <div class="flex items-center gap-3">
-            <div class="h-5 w-5 bg-zinc-200 rounded animate-pulse"></div>
-            <div class="h-5 bg-zinc-200 rounded animate-pulse w-1/3"></div>
+            <div class="h-6 w-6 rounded-lg shimmer-block shrink-0"></div>
+            <div class="h-5 bg-zinc-200 rounded-md w-1/3 shimmer-block"></div>
           </div>
           <div class="flex flex-col gap-3">
-            <div class="h-4.5 bg-zinc-100 rounded animate-pulse w-full"></div>
-            <div class="h-4.5 bg-zinc-100 rounded animate-pulse w-11/12"></div>
-            <div class="h-4.5 bg-zinc-100 rounded animate-pulse w-4/5"></div>
+            <div class="h-4.5 bg-zinc-100 rounded-md w-full shimmer-block"></div>
+            <div class="h-4.5 bg-zinc-100 rounded-md w-11/12 shimmer-block"></div>
+            <div class="h-4.5 bg-zinc-100 rounded-md w-4/5 shimmer-block"></div>
           </div>
           <div class="h-px bg-zinc-100 my-2"></div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 border border-zinc-100 rounded-lg bg-zinc-50/50 space-y-2">
-              <div class="h-3.5 bg-zinc-200 rounded w-1/4 animate-pulse"></div>
-              <div class="h-3 bg-zinc-100 rounded w-full animate-pulse"></div>
+            <div class="p-4.5 border border-zinc-150 rounded-xl bg-zinc-50/50 space-y-3">
+              <div class="h-4 bg-zinc-250 rounded-md w-1/4 shimmer-block"></div>
+              <div class="h-3.5 bg-zinc-100 rounded-md w-full shimmer-block"></div>
+              <div class="h-3.5 bg-zinc-100 rounded-md w-5/6 shimmer-block"></div>
             </div>
-            <div class="p-4 border border-zinc-100 rounded-lg bg-zinc-50/50 space-y-2">
-              <div class="h-3.5 bg-zinc-200 rounded w-1/4 animate-pulse"></div>
-              <div class="h-3 bg-zinc-100 rounded w-full animate-pulse"></div>
+            <div class="p-4.5 border border-zinc-150 rounded-xl bg-zinc-50/50 space-y-3">
+              <div class="h-4 bg-zinc-250 rounded-md w-1/3 shimmer-block"></div>
+              <div class="h-3.5 bg-zinc-100 rounded-md w-full shimmer-block"></div>
+              <div class="h-3.5 bg-zinc-100 rounded-md w-4/5 shimmer-block"></div>
             </div>
           </div>
         </div>
 
         <!-- Premium Empty State -->
-        <div v-else-if="scopeStore.sections.length === 0 && !scopeStore.isInitiating" class="py-20 border border-dashed border-zinc-200/80 rounded-xl flex flex-col items-center justify-center text-center p-6 bg-zinc-50/30">
+        <div v-else-if="scopeStore.sections.length === 0 && !scopeStore.isInitiating" class="flex-grow py-20 border border-dashed border-zinc-200/80 rounded-xl flex flex-col items-center justify-center text-center p-6 bg-zinc-50/30 animate-fade-in-up">
           <div class="h-11 w-11 rounded-xl bg-white border border-zinc-200 flex items-center justify-center text-zinc-400 mb-3 shadow-sm">
             <svg class="h-5 w-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -521,7 +561,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
         </div>
 
         <!-- Live Content Workspace -->
-        <div v-else class="flex flex-col gap-5">
+        <div v-else class="flex-grow overflow-hidden flex flex-col gap-4">
 
           <!-- Segment control: step tabs (Vercel-inspired) -->
           <div class="grid grid-cols-3 p-1.5 bg-zinc-100/80 rounded-xl gap-1 border border-zinc-200/50">
@@ -598,164 +638,188 @@ watch(() => scopeStore.isStreaming, (streaming) => {
               </button>
             </div>
           </div>
-
-          <!-- TABS VIEW -->
-          <div v-if="viewMode === 'steps'" class="min-h-[380px] max-h-[600px] overflow-y-auto pr-1">
-            <article v-if="activeSection" class="rounded-xl border border-zinc-200 p-5 bg-white shadow-xs">
-              <header class="mb-4.5 flex items-center justify-between pb-3.5 border-b border-zinc-100">
-                <h3 class="text-xs font-bold text-zinc-950 flex items-center gap-2 tracking-tight">
-                  <span class="h-5 w-5 rounded bg-zinc-100 text-[10px] font-extrabold text-zinc-500 flex items-center justify-center">{{ activeSection.step }}</span>
-                  {{ activeSection.title }}
-                </h3>
-                <span
-                  class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                  :class="activeSection.step === scopeStore.sections[scopeStore.sections.length - 1]?.step && scopeStore.isStreaming
-                    ? 'bg-amber-50 text-amber-800 border border-amber-200/60'
-                    : 'bg-emerald-50 text-emerald-800 border border-emerald-200/60'"
-                >
-                  {{ activeSection.step === scopeStore.sections[scopeStore.sections.length - 1]?.step && scopeStore.isStreaming ? 'Streaming…' : 'Complete' }}
-                </span>
-              </header>
-              <div class="scope-prose" v-html="parseMarkdown(activeSection.content, activeSection.step) + (scopeStore.isStreaming && scopeStore.sections[scopeStore.sections.length - 1]?.step === activeSection.step ? '<span class=\'inline-block ml-0.5 w-1.5 h-4 bg-zinc-900 animate-pulse align-middle rounded-sm\'></span>' : '')"></div>
-            </article>
-            <div v-else class="py-20 border border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-center p-6 bg-zinc-50/20 select-none">
-              <!-- Beautiful lock design -->
-              <div class="h-10 w-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400 mb-3 border border-zinc-200">
-                <svg class="h-4.5 w-4.5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-              </div>
-              <h5 class="text-xs font-bold text-zinc-950">Section Locked</h5>
-              <p class="text-[11px] text-zinc-400 max-w-[200px] leading-relaxed mt-1">This stage will render dynamically as soon as the previous analysis settles.</p>
-            </div>
-          </div>
-
-          <!-- FULL REPORT VIEW -->
-          <div v-else-if="viewMode === 'full'" class="max-h-[600px] overflow-y-auto pr-1">
-            <div class="border border-zinc-200 rounded-xl p-6 md:p-8 flex flex-col gap-6 bg-white shadow-xs">
-              
-              <!-- Report header -->
-              <div class="border-b border-zinc-100 pb-5">
-                <div class="flex items-center justify-between mb-3">
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-450">System Architecture Specification</span>
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-450 bg-zinc-100 px-1.5 py-0.5 rounded">CONFIDENTIAL</span>
-                </div>
-                <h3 class="text-xl font-extrabold text-zinc-950 tracking-tight leading-none">Engineering Scope Blueprint</h3>
-                <p class="text-xs text-zinc-450 mt-1.5">Unified report detailing application constraints, risks, stack composition, and milestone schedules.</p>
-                
-                <!-- Facts Grid -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-zinc-50/50 rounded-xl p-4.5 border border-zinc-150/80 mt-5">
-                  <div class="flex flex-col">
-                    <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
-                      <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                        <polyline points="2 17 12 22 22 17"></polyline>
-                        <polyline points="2 12 12 17 22 12"></polyline>
-                      </svg>
-                      Project Type
+                  <!-- VIEW CONTAINER WITH TRANSITION -->
+          <transition name="view-fade" mode="out-in">
+            <!-- TABS VIEW -->
+            <div v-if="viewMode === 'steps'" key="steps" ref="scrollContainer" class="flex-grow overflow-y-auto pr-1 scroll-smooth">
+              <transition name="tab-fade" mode="out-in">
+                <article v-if="activeSection" :key="activeSection.step" class="rounded-xl border border-zinc-200 p-5 bg-white shadow-xs">
+                  <header class="mb-4.5 flex items-center justify-between pb-3.5 border-b border-zinc-100">
+                    <h3 class="text-xs font-bold text-zinc-950 flex items-center gap-2 tracking-tight">
+                      <span class="h-5 w-5 rounded bg-zinc-100 text-[10px] font-extrabold text-zinc-500 flex items-center justify-center">{{ activeSection.step }}</span>
+                      {{ activeSection.title }}
+                    </h3>
+                    <span
+                      class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                      :class="activeSection.step === scopeStore.sections[scopeStore.sections.length - 1]?.step && scopeStore.isStreaming
+                        ? 'bg-amber-50 text-amber-800 border border-amber-200/60'
+                        : 'bg-emerald-50 text-emerald-800 border border-emerald-200/60'"
+                    >
+                      {{ activeSection.step === scopeStore.sections[scopeStore.sections.length - 1]?.step && scopeStore.isStreaming ? 'Streaming…' : 'Complete' }}
                     </span>
-                    <span class="text-[11px] font-bold text-zinc-750 capitalize tracking-wide">{{ scopeStore.projectType.replace('_', ' ') }}</span>
-                  </div>
-                  <div class="flex flex-col">
-                    <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
-                      <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="9" y1="3" x2="9" y2="21"></line>
-                      </svg>
-                      Industry Domain
-                    </span>
-                    <span class="text-[11px] font-bold text-zinc-750 truncate tracking-wide">{{ scopeStore.industry || 'General Domain' }}</span>
-                  </div>
-                  <div class="flex flex-col">
-                    <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
-                      <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <line x1="12" y1="1" x2="12" y2="23"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                      </svg>
-                      Budget Cap
-                    </span>
-                    <span class="text-[11px] font-bold text-zinc-700 tracking-wide">{{ scopeStore.budgetUsd ? '$' + scopeStore.budgetUsd.toLocaleString() : 'Not Specified' }}</span>
-                  </div>
-                  <div class="flex flex-col">
-                    <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
-                      <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-                        <line x1="7" y1="2" x2="7" y2="22"></line>
-                        <line x1="17" y1="2" x2="17" y2="22"></line>
-                        <line x1="2" y1="12" x2="22" y2="12"></line>
-                      </svg>
-                      Target Platforms
-                    </span>
-                    <span class="text-[11px] font-bold text-zinc-750 capitalize truncate tracking-wide">{{ scopeStore.platforms.join(', ') }}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Sections list -->
-              <div class="flex flex-col gap-6">
-                <section v-for="(section, idx) in scopeStore.sections" :key="`full-${section.step}-${idx}`" class="flex flex-col gap-3">
-                  <header class="flex items-center gap-2 border-b border-zinc-100 pb-1.5">
-                    <span class="h-4.5 w-4.5 rounded bg-zinc-950 text-[9px] font-extrabold text-white flex items-center justify-center">{{ section.step }}</span>
-                    <h4 class="text-xs font-bold text-zinc-950 uppercase tracking-wider">{{ section.title }}</h4>
                   </header>
-                  <div class="scope-prose" v-html="parseMarkdown(section.content, section.step) + (scopeStore.isStreaming && idx === scopeStore.sections.length - 1 ? '<span class=\'inline-block ml-0.5 w-1.5 h-4 bg-zinc-900 animate-pulse align-middle rounded-sm\'></span>' : '')"></div>
-                </section>
-              </div>
+                  <div class="scope-prose" v-html="parseMarkdown(activeSection.content, activeSection.step) + (scopeStore.isStreaming && scopeStore.sections[scopeStore.sections.length - 1]?.step === activeSection.step ? '<span class=\'inline-block ml-0.5 w-1.5 h-4 bg-zinc-900 animate-pulse align-middle rounded-sm\'></span>' : '')"></div>
+                </article>
+                
+                <!-- Shimmering Skeleton for Locked Steps under active generation -->
+                <div v-else-if="scopeStore.isStreaming" key="streaming-shimmer" class="flex flex-col gap-5 py-6">
+                  <div class="flex items-center gap-3">
+                    <div class="h-5.5 w-5.5 rounded-md shimmer-block shrink-0"></div>
+                    <div class="h-4.5 bg-zinc-250 rounded-md w-1/3 shimmer-block"></div>
+                  </div>
+                  <div class="flex flex-col gap-3">
+                    <div class="h-4 bg-zinc-100 rounded-md w-full shimmer-block"></div>
+                    <div class="h-4 bg-zinc-100 rounded-md w-11/12 shimmer-block"></div>
+                    <div class="h-4 bg-zinc-100 rounded-md w-4/5 shimmer-block"></div>
+                  </div>
+                  <div class="h-px bg-zinc-100 my-2"></div>
+                  <div class="p-5 border border-zinc-150 rounded-xl bg-zinc-50/50 space-y-3">
+                    <div class="h-4 bg-zinc-200 rounded-md w-1/5 shimmer-block"></div>
+                    <div class="h-3.5 bg-zinc-100 rounded-md w-full shimmer-block"></div>
+                    <div class="h-3.5 bg-zinc-100 rounded-md w-4/5 shimmer-block"></div>
+                  </div>
+                </div>
 
-              <!-- Footer -->
-              <div class="border-t border-zinc-100 pt-4 flex items-center justify-between text-[10px] text-zinc-400 font-medium">
-                <span>© ScopeFlow.ai — Automated Scoping Engine</span>
-                <span>Page 1 of 1</span>
+                <!-- Standard Idle Locked Tab view -->
+                <div v-else key="locked-state" class="py-20 border border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-center p-6 bg-zinc-50/20 select-none">
+                  <!-- Beautiful lock design -->
+                  <div class="h-10 w-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400 mb-3 border border-zinc-200">
+                    <svg class="h-4.5 w-4.5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                  </div>
+                  <h5 class="text-xs font-bold text-zinc-950">Section Locked</h5>
+                  <p class="text-[11px] text-zinc-400 max-w-[200px] leading-relaxed mt-1">This stage will render dynamically as soon as the previous analysis settles.</p>
+                </div>
+              </transition>
+            </div>
+
+            <!-- FULL REPORT VIEW -->
+            <div v-else-if="viewMode === 'full'" key="full" ref="scrollContainer" class="flex-grow overflow-y-auto pr-1 scroll-smooth">
+              <div class="border border-zinc-200 rounded-xl p-6 md:p-8 flex flex-col gap-6 bg-white shadow-xs">
+                
+                <!-- Report header -->
+                <div class="border-b border-zinc-100 pb-5">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-450">System Architecture Specification</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-450 bg-zinc-100 px-1.5 py-0.5 rounded">CONFIDENTIAL</span>
+                  </div>
+                  <h3 class="text-xl font-extrabold text-zinc-950 tracking-tight leading-none">Engineering Scope Blueprint</h3>
+                  <p class="text-xs text-zinc-450 mt-1.5">Unified report detailing application constraints, risks, stack composition, and milestone schedules.</p>
+                  
+                  <!-- Facts Grid -->
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-zinc-50/50 rounded-xl p-4.5 border border-zinc-150/80 mt-5">
+                    <div class="flex flex-col">
+                      <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
+                        <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                          <polyline points="2 17 12 22 22 17"></polyline>
+                          <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                        Project Type
+                      </span>
+                      <span class="text-[11px] font-bold text-zinc-750 capitalize tracking-wide">{{ scopeStore.projectType.replace('_', ' ') }}</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
+                        <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="9" y1="3" x2="9" y2="21"></line>
+                        </svg>
+                        Industry Domain
+                      </span>
+                      <span class="text-[11px] font-bold text-zinc-750 truncate tracking-wide">{{ scopeStore.industry || 'General Domain' }}</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
+                        <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <line x1="12" y1="1" x2="12" y2="23"></line>
+                          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        Budget Cap
+                      </span>
+                      <span class="text-[11px] font-bold text-zinc-700 tracking-wide">{{ scopeStore.budgetUsd ? '$' + scopeStore.budgetUsd.toLocaleString() : 'Not Specified' }}</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
+                        <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                          <line x1="7" y1="2" x2="7" y2="22"></line>
+                          <line x1="17" y1="2" x2="17" y2="22"></line>
+                          <line x1="2" y1="12" x2="22" y2="12"></line>
+                        </svg>
+                        Target Platforms
+                      </span>
+                      <span class="text-[11px] font-bold text-zinc-750 capitalize truncate tracking-wide">{{ scopeStore.platforms.join(', ') }}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Sections list -->
+                <div class="flex flex-col gap-6">
+                  <section v-for="(section, idx) in scopeStore.sections" :key="`full-${section.step}-${idx}`" class="flex flex-col gap-3">
+                    <header class="flex items-center gap-2 border-b border-zinc-100 pb-1.5">
+                      <span class="h-4.5 w-4.5 rounded bg-zinc-950 text-[9px] font-extrabold text-white flex items-center justify-center">{{ section.step }}</span>
+                      <h4 class="text-xs font-bold text-zinc-950 uppercase tracking-wider">{{ section.title }}</h4>
+                    </header>
+                    <div class="scope-prose" v-html="parseMarkdown(section.content, section.step) + (scopeStore.isStreaming && idx === scopeStore.sections.length - 1 ? '<span class=\'inline-block ml-0.5 w-1.5 h-4 bg-zinc-900 animate-pulse align-middle rounded-sm\'></span>' : '')"></div>
+                  </section>
+                </div>
+
+                <!-- Footer -->
+                <div class="border-t border-zinc-100 pt-4 flex items-center justify-between text-[10px] text-zinc-400 font-medium">
+                  <span>© ScopeFlow.ai — Automated Scoping Engine</span>
+                  <span>Page 1 of 1</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- EDITOR VIEW -->
-          <div v-else-if="viewMode === 'editor'" class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-zinc-950">Markdown Workspace</span>
-              <button
-                type="button"
-                class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-zinc-950 hover:bg-zinc-900 text-white border-none cursor-pointer transition-colors shadow-xs"
-                @click="saveEditorChanges"
-              >
-                Sync Back Changes
-              </button>
-            </div>
-            
-            <div class="rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950 shadow-md">
-              <!-- Monospace Editor Toolbar -->
-              <div class="flex items-center gap-1.5 px-4 py-2 bg-zinc-900 border-b border-zinc-800">
-                <button v-for="btn in [
-                  { syntax: 'bold', label: 'B', cls: 'font-bold' },
-                  { syntax: 'italic', label: 'I', cls: 'italic' }
-                ]" :key="btn.syntax" type="button" @click="insertMarkdown(btn.syntax)"
-                  :class="'px-2 py-0.5 hover:bg-zinc-700/50 rounded text-xs text-zinc-400 hover:text-zinc-200 cursor-pointer border-none bg-transparent transition-colors ' + btn.cls"
-                >{{ btn.label }}</button>
-                
-                <div class="w-px h-3 bg-zinc-800 mx-1"></div>
-                
-                <button v-for="btn in [
-                  { syntax: 'code', icon: 'pi-code' },
-                  { syntax: 'link', icon: 'pi-link' },
-                  { syntax: 'list', icon: 'pi-list' }
-                ]" :key="btn.syntax" type="button" @click="insertMarkdown(btn.syntax)"
-                  class="px-2 py-0.5 hover:bg-zinc-700/50 rounded text-zinc-400 hover:text-zinc-200 cursor-pointer border-none bg-transparent transition-colors"
-                ><i :class="'pi ' + btn.icon + ' text-[10px]'"></i></button>
-                
-                <span class="ml-auto text-[10px] text-zinc-500 select-none font-mono">markdown-mode</span>
+            <!-- EDITOR VIEW -->
+            <div v-else-if="viewMode === 'editor'" key="editor" class="flex-grow flex flex-col gap-3 overflow-hidden">
+              <div class="shrink-0 flex items-center justify-between">
+                <span class="text-xs font-bold text-zinc-950">Markdown Workspace</span>
+                <button
+                  type="button"
+                  class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-zinc-950 hover:bg-zinc-900 text-white border-none cursor-pointer transition-colors shadow-xs"
+                  @click="saveEditorChanges"
+                >
+                  Sync Back Changes
+                </button>
               </div>
               
-              <textarea
-                v-model="fullMarkdownText"
-                rows="15"
-                class="w-full bg-transparent text-zinc-300 text-[13px] p-4.5 focus:outline-none border-none resize-y leading-relaxed font-mono"
-                placeholder="Edit the unified markdown scope document here..."
-              ></textarea>
+              <div class="flex-grow flex flex-col rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950 shadow-md">
+                <!-- Monospace Editor Toolbar -->
+                <div class="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-zinc-900 border-b border-zinc-800">
+                  <button v-for="btn in [
+                    { syntax: 'bold', label: 'B', cls: 'font-bold' },
+                    { syntax: 'italic', label: 'I', cls: 'italic' }
+                  ]" :key="btn.syntax" type="button" @click="insertMarkdown(btn.syntax)"
+                    :class="'px-2 py-0.5 hover:bg-zinc-700/50 rounded text-xs text-zinc-400 hover:text-zinc-200 cursor-pointer border-none bg-transparent transition-colors ' + btn.cls"
+                  >{{ btn.label }}</button>
+                  
+                  <div class="w-px h-3 bg-zinc-800 mx-1"></div>
+                  
+                  <button v-for="btn in [
+                    { syntax: 'code', icon: 'pi-code' },
+                    { syntax: 'link', icon: 'pi-link' },
+                    { syntax: 'list', icon: 'pi-list' }
+                  ]" :key="btn.syntax" type="button" @click="insertMarkdown(btn.syntax)"
+                    class="px-2 py-0.5 hover:bg-zinc-700/50 rounded text-zinc-400 hover:text-zinc-200 cursor-pointer border-none bg-transparent transition-colors"
+                  ><i :class="'pi ' + btn.icon + ' text-[10px]'"></i></button>
+                  
+                  <span class="ml-auto text-[10px] text-zinc-500 select-none font-mono">markdown-mode</span>
+                </div>
+                
+                <textarea
+                  v-model="fullMarkdownText"
+                  class="flex-grow w-full bg-transparent text-zinc-300 text-[13px] p-4.5 focus:outline-none border-none resize-none leading-relaxed font-mono overflow-y-auto"
+                  placeholder="Edit the unified markdown scope document here..."
+                ></textarea>
+              </div>
+              <p class="shrink-0 text-[11px] text-zinc-400">Edits made here are saved directly back into your Tabs and Report layouts.</p>
             </div>
-            <p class="text-[11px] text-zinc-400">Edits made here are saved directly back into your Tabs and Report layouts.</p>
-          </div>
+          </transition>
 
           <!-- Export Actions -->
           <div v-if="hasDocument" class="flex justify-end gap-2.5 border-t border-zinc-150 pt-4 mt-2">
@@ -800,30 +864,357 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 </template>
 
 <style scoped>
+/* Shimmering Loading Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-block {
+  background: linear-gradient(90deg, #f4f4f5 25%, #e4e4e7 50%, #f4f4f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Base prose text styles for document rendering */
+:deep(.scope-prose) {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: #27272a;
+}
+
+:deep(.scope-prose) p {
+  margin-bottom: 1.25rem;
+  color: #27272a;
+}
+
+:deep(.scope-prose) h2 {
+  font-size: 1.4rem;
+  font-weight: 850;
+  color: #09090b;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f4f4f5;
+  letter-spacing: -0.025em;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+:deep(.scope-prose) h3 {
+  font-size: 1.15rem;
+  font-weight: 750;
+  color: #09090b;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.015em;
+}
+
+:deep(.scope-prose) h4 {
+  font-size: 0.825rem;
+  font-weight: 800;
+  color: #71717a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
 :deep(.scope-prose) ul {
   padding-left: 1.25rem;
-  margin: 0.5rem 0 0.8rem;
-  list-style-type: disc;
+  margin-top: 0.5rem;
+  margin-bottom: 1.25rem;
+  list-style-type: none;
 }
+
 :deep(.scope-prose) li {
-  margin: 0.25rem 0;
-  line-height: 1.6;
-  font-size: 0.85rem;
-  color: #3f3f46;
+  position: relative;
+  margin-bottom: 0.5rem;
+  padding-left: 1.25rem;
+  color: #27272a;
 }
-:deep(.scope-prose) h2, :deep(.scope-prose) h3, :deep(.scope-prose) h4 {
-  font-weight: 700;
-  color: #09090b;
+
+:deep(.scope-prose) li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #a1a1aa;
+  font-weight: bold;
 }
-:deep(.scope-prose) p {
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: #3f3f46;
-  margin-bottom: 0.75rem;
-}
+
 :deep(.scope-prose) strong {
-  color: #09090b;
   font-weight: 700;
+  color: #09090b;
+}
+
+:deep(.scope-prose) hr {
+  border: 0;
+  border-top: 1px solid #e4e4e7;
+  margin: 2rem 0;
+}
+
+:deep(.scope-inline-code) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85em;
+  background-color: #f4f4f5;
+  color: #18181b;
+  padding: 0.15rem 0.35rem;
+  border-radius: 6px;
+  border: 1px solid rgba(9, 9, 11, 0.06);
+}
+
+/* Classification Card styling */
+:deep(.classification-card) {
+  margin-bottom: 1.5rem;
+  padding: 1.15rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #e4e4e7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background-color: #fafafa;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+:deep(.classification-card:hover) {
+  border-color: #d4d4d8;
+  box-shadow: 0 4px 12px rgba(9, 9, 11, 0.02);
+}
+
+:deep(.classification-card.classification-low .card-value) {
+  color: #10b981;
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+:deep(.classification-card.classification-medium .card-value) {
+  color: #d97706;
+  background-color: #fffbeb;
+  border-color: #fde68a;
+}
+
+:deep(.classification-card.classification-high .card-value) {
+  color: #ef4444;
+  background-color: #fef2f2;
+  border-color: #fca5a5;
+}
+
+:deep(.classification-card .card-label) {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #52525b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+:deep(.classification-card .card-label i) {
+  font-size: 1rem;
+}
+
+:deep(.classification-card.classification-low .card-label i) {
+  color: #10b981;
+}
+
+:deep(.classification-card.classification-medium .card-label i) {
+  color: #f59e0b;
+}
+
+:deep(.classification-card.classification-high .card-label i) {
+  color: #ef4444;
+}
+
+:deep(.classification-card .card-value) {
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  border: 1px solid #e4e4e7;
+  color: #09090b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+/* Rationale block styling */
+:deep(.rationale-card) {
+  padding: 1.25rem;
+  background-color: #fafafa;
+  border: 1px solid #e4e4e7;
+  border-left: 4px solid #09090b;
+  border-radius: 12px;
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+:deep(.rationale-card .rationale-label) {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+:deep(.rationale-card .rationale-text) {
+  color: #27272a;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Risk Card design */
+:deep(.risk-card) {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid #e4e4e7;
+  background-color: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01), 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+:deep(.risk-card:hover) {
+  border-color: #d4d4d8;
+  box-shadow: 0 4px 16px rgba(9, 9, 11, 0.025);
+}
+
+:deep(.risk-card .risk-row), :deep(.risk-card .mitigation-row) {
+  display: flex;
+  align-items: start;
+  gap: 0.75rem;
+}
+
+:deep(.risk-card .risk-badge), :deep(.risk-card .mitigation-badge) {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  margin-top: 0.125rem;
+}
+
+:deep(.risk-card .risk-badge) {
+  background-color: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fee2e2;
+}
+
+:deep(.risk-card .mitigation-badge) {
+  background-color: #f0fdf4;
+  color: #10b981;
+  border: 1px solid #dcfce7;
+}
+
+:deep(.risk-card .risk-text) {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #18181b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+:deep(.risk-card .mitigation-text) {
+  font-size: 0.875rem;
+  color: #52525b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+:deep(.risk-card .mitigation-row) {
+  border-top: 1px solid #f4f4f5;
+  padding-top: 0.875rem;
+}
+
+/* Premium Table design */
+:deep(.table-container) {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+:deep(.scope-table) {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+:deep(.scope-table thead) {
+  background-color: #fafafa;
+  border-bottom: 1px solid #e4e4e7;
+}
+
+:deep(.scope-table th) {
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  color: #52525b;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+:deep(.scope-table td) {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid #f4f4f5;
+  color: #27272a;
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+:deep(.scope-table tr:last-child td) {
+  border-bottom: none;
+}
+
+:deep(.scope-table tr:hover td) {
+  background-color: rgba(250, 250, 250, 0.5);
+}
+
+/* Tab Fade and View Fade Transitions */
+.tab-fade-enter-active,
+.tab-fade-leave-active,
+.view-fade-enter-active,
+.view-fade-leave-active {
+  transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tab-fade-enter-from,
+.tab-fade-leave-to,
+.view-fade-enter-from,
+.view-fade-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+/* Empty state fade-in-up */
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
 
