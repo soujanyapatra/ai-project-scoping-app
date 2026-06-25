@@ -504,23 +504,36 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 </script>
 
 <template>
-  <div class="rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm h-full flex flex-col">
+  <div class="rounded-xl border border-zinc-200/80 bg-white overflow-hidden shadow-sm h-full flex flex-col">
 
     <!-- Header -->
-    <div class="px-6 py-4.5 border-b border-zinc-100 flex items-center justify-between">
+    <div class="px-5 py-3.5 border-b border-zinc-100 flex items-center justify-between shrink-0">
       <div>
         <h2 class="text-sm font-bold text-zinc-950 tracking-tight">{{ t('output.title') }}</h2>
         <p class="text-xs text-zinc-400 mt-0.5">Real-time architecture analysis</p>
       </div>
-      <div>
-        <span v-if="scopeStore.isInitiating || scopeStore.isStreaming" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200/60 animate-pulse">
-          <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-          Streaming Blueprints
-        </span>
-        <span v-else-if="scopeStore.sections.length > 0" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100">
-          ✓ {{ t('output.ready') }}
-        </span>
-        <span v-else class="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Idle</span>
+      <div class="flex items-center gap-2">
+        <!-- Streaming indicator -->
+        <transition name="badge-fade" mode="out-in">
+          <span v-if="scopeStore.isInitiating || scopeStore.isStreaming" key="streaming"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/60">
+            <span class="relative flex h-1.5 w-1.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+            </span>
+            Streaming
+          </span>
+          <span v-else-if="scopeStore.sections.length > 0" key="ready"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+            {{ t('output.ready') }}
+          </span>
+          <span v-else key="idle"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-zinc-400 bg-zinc-50 border border-zinc-200/60">
+            <span class="h-1.5 w-1.5 rounded-full bg-zinc-300"></span>
+            Idle
+          </span>
+        </transition>
       </div>
     </div>
 
@@ -537,50 +550,78 @@ watch(() => scopeStore.isStreaming, (streaming) => {
           </div>
         </div>
 
-        <!-- Skeleton / Loading State (Shimmering) -->
-        <div v-else-if="scopeStore.isInitiating && scopeStore.sections.length === 0" class="flex-grow flex flex-col gap-6 py-4 overflow-y-auto">
-          <div class="flex items-center gap-3">
-            <div class="h-6 w-6 rounded-lg shimmer-block shrink-0"></div>
-            <div class="h-5 bg-zinc-200 rounded-md w-1/3 shimmer-block"></div>
-          </div>
-          <div class="flex flex-col gap-3">
-            <div class="h-4.5 bg-zinc-100 rounded-md w-full shimmer-block"></div>
-            <div class="h-4.5 bg-zinc-100 rounded-md w-11/12 shimmer-block"></div>
-            <div class="h-4.5 bg-zinc-100 rounded-md w-4/5 shimmer-block"></div>
-          </div>
-          <div class="h-px bg-zinc-100 my-2"></div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4.5 border border-zinc-150 rounded-xl bg-zinc-50/50 space-y-3">
-              <div class="h-4 bg-zinc-250 rounded-md w-1/4 shimmer-block"></div>
-              <div class="h-3.5 bg-zinc-100 rounded-md w-full shimmer-block"></div>
-              <div class="h-3.5 bg-zinc-100 rounded-md w-5/6 shimmer-block"></div>
+        <!-- AI Skeleton / Loading State -->
+        <div v-else-if="scopeStore.isInitiating && scopeStore.sections.length === 0" class="flex-grow flex flex-col gap-5 py-2 overflow-y-auto">
+          <!-- AI thinking header -->
+          <div class="flex items-center gap-3 p-4 rounded-xl bg-zinc-50/60 border border-zinc-100">
+            <div class="h-8 w-8 rounded-lg skeleton shrink-0"></div>
+            <div class="flex-grow space-y-2">
+              <div class="h-3.5 skeleton rounded w-1/3"></div>
+              <div class="h-3 skeleton rounded w-1/2"></div>
             </div>
-            <div class="p-4.5 border border-zinc-150 rounded-xl bg-zinc-50/50 space-y-3">
-              <div class="h-4 bg-zinc-250 rounded-md w-1/3 shimmer-block"></div>
-              <div class="h-3.5 bg-zinc-100 rounded-md w-full shimmer-block"></div>
-              <div class="h-3.5 bg-zinc-100 rounded-md w-4/5 shimmer-block"></div>
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200/60">
+              <span class="thinking-dots text-amber-500">
+                <span></span><span></span><span></span>
+              </span>
+              <span class="text-[10px] font-bold text-amber-700">Thinking</span>
             </div>
+          </div>
+          <!-- Skeleton lines -->
+          <div class="flex flex-col gap-2.5 px-1">
+            <div class="h-4 skeleton rounded w-full"></div>
+            <div class="h-4 skeleton rounded w-10/12"></div>
+            <div class="h-4 skeleton rounded w-11/12"></div>
+            <div class="h-4 skeleton rounded w-3/4"></div>
+          </div>
+          <div class="h-px bg-zinc-100"></div>
+          <!-- Card skeletons -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div v-for="n in 2" :key="n" class="p-4 border border-zinc-100 rounded-xl bg-zinc-50/40 space-y-3">
+              <div class="flex items-center gap-2">
+                <div class="h-5 w-5 skeleton rounded-md shrink-0"></div>
+                <div class="h-3.5 skeleton rounded w-1/3"></div>
+              </div>
+              <div class="space-y-2">
+                <div class="h-3 skeleton rounded w-full"></div>
+                <div class="h-3 skeleton rounded w-5/6"></div>
+                <div class="h-3 skeleton rounded w-4/5"></div>
+              </div>
+            </div>
+          </div>
+          <!-- More skeleton rows -->
+          <div class="flex flex-col gap-2.5 px-1">
+            <div class="h-4 skeleton rounded w-2/3"></div>
+            <div class="h-4 skeleton rounded w-11/12"></div>
+            <div class="h-4 skeleton rounded w-5/6"></div>
           </div>
         </div>
 
         <!-- Premium Empty State -->
-        <div v-else-if="scopeStore.sections.length === 0 && !scopeStore.isInitiating" class="flex-grow py-20 border border-dashed border-zinc-200/80 rounded-xl flex flex-col items-center justify-center text-center p-6 bg-zinc-50/30 animate-fade-in-up">
-          <div class="h-11 w-11 rounded-xl bg-white border border-zinc-200 flex items-center justify-center text-zinc-400 mb-3 shadow-sm">
-            <svg class="h-5 w-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <div v-else-if="scopeStore.sections.length === 0 && !scopeStore.isInitiating"
+          class="flex-grow border border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-center p-8 bg-zinc-50/20 animate-fade-in-up">
+          <!-- Icon -->
+          <div class="h-12 w-12 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center text-zinc-400 mb-4 shadow-sm">
+            <svg class="h-5.5 w-5.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
             </svg>
           </div>
           <h4 class="text-sm font-bold text-zinc-950">Awaiting Specifications</h4>
-          <p class="text-xs text-zinc-450 mt-1 max-w-sm leading-relaxed">
-            Specify project details on the left sidebar, or prefill configurations using one of our quick-start templates above.
+          <p class="text-xs text-zinc-400 mt-1.5 max-w-[260px] leading-relaxed">
+            Configure your project in the sidebar, or use a quick-start template to prefill all parameters.
           </p>
+          <div class="mt-5 flex items-center gap-1.5 text-[11px] text-zinc-400">
+            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            </svg>
+            Fill in the form to generate your scope document
+          </div>
         </div>
 
         <!-- Live Content Workspace -->
         <div v-else class="flex-grow overflow-hidden flex flex-col gap-4">
 
-          <!-- Segment control: step tabs (Vercel-inspired) -->
-          <div class="grid grid-cols-3 p-1.5 bg-zinc-100/80 rounded-xl gap-1 border border-zinc-200/50">
+          <!-- Segment control: step tabs -->
+          <div class="grid grid-cols-3 p-1 bg-zinc-100/70 rounded-xl gap-0.5 border border-zinc-200/40 shrink-0">
             <button
               v-for="tab in [
                 { step: 1, label: 'Classification', status: step1Status },
@@ -589,28 +630,28 @@ watch(() => scopeStore.isStreaming, (streaming) => {
               ]"
               :key="tab.step"
               type="button"
-              class="flex items-center justify-center gap-2 py-2 text-[11.5px] font-bold transition-all duration-200 border-none outline-none cursor-pointer rounded-lg"
+              class="flex items-center justify-center gap-1.5 py-2 text-[11px] font-bold transition-all duration-200 border-none outline-none cursor-pointer rounded-lg select-none"
               :class="[
                 activeTab === tab.step
-                  ? 'bg-white text-zinc-950 shadow-[0_2px_8px_rgba(9,9,11,0.04)] ring-1 ring-zinc-950/5'
-                  : 'text-zinc-500 hover:text-zinc-900'
+                  ? 'bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-950/5'
+                  : 'text-zinc-500 hover:text-zinc-800 hover:bg-white/50'
               ]"
               @click="activeTab = tab.step"
             >
-              <span
-                v-if="tab.status === 'completed'"
-                class="h-4 w-4 rounded-full bg-emerald-500 text-white text-[8px] flex items-center justify-center font-bold"
-              >✓</span>
-              <span
-                v-else-if="tab.status === 'active'"
-                class="h-4 w-4 rounded-full bg-indigo-600 text-white text-[8px] flex items-center justify-center animate-pulse"
-              >{{ tab.step }}</span>
-              <span
-                v-else
-                class="h-4 w-4 rounded-full bg-zinc-200 text-zinc-400 text-[8px] flex items-center justify-center font-bold"
-              >{{ tab.step }}</span>
-              <span class="hidden sm:inline">{{ tab.label }}</span>
-              <span class="sm:hidden">Step {{ tab.step }}</span>
+              <!-- Completed badge -->
+              <span v-if="tab.status === 'completed'"
+                class="h-4 w-4 rounded-full bg-emerald-500 text-white text-[8px] flex items-center justify-center font-extrabold shrink-0">✓</span>
+              <!-- Active pulsing badge -->
+              <span v-else-if="tab.status === 'active'"
+                class="relative h-4 w-4 shrink-0">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-60"></span>
+                <span class="relative h-4 w-4 rounded-full bg-indigo-600 text-white text-[8px] flex items-center justify-center font-extrabold">{{ tab.step }}</span>
+              </span>
+              <!-- Pending badge -->
+              <span v-else
+                class="h-4 w-4 rounded-full bg-zinc-200 text-zinc-400 text-[8px] flex items-center justify-center font-bold shrink-0">{{ tab.step }}</span>
+              <span class="hidden sm:inline truncate">{{ tab.label }}</span>
+              <span class="sm:hidden">S{{ tab.step }}</span>
             </button>
           </div>
 
@@ -697,16 +738,15 @@ watch(() => scopeStore.isStreaming, (streaming) => {
                 </div>
 
                 <!-- Standard Idle Locked Tab view -->
-                <div v-else key="locked-state" class="py-20 border border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-center p-6 bg-zinc-50/20 select-none">
-                  <!-- Beautiful lock design -->
-                  <div class="h-10 w-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400 mb-3 border border-zinc-200">
-                    <svg class="h-4.5 w-4.5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <div v-else key="locked-state" class="py-16 border border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-center p-6 bg-zinc-50/20 select-none animate-fade-in">
+                  <div class="h-9 w-9 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-400 mb-3 border border-zinc-200">
+                    <svg class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                       <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
                   </div>
-                  <h5 class="text-xs font-bold text-zinc-950">Section Locked</h5>
-                  <p class="text-[11px] text-zinc-400 max-w-[200px] leading-relaxed mt-1">This stage will render dynamically as soon as the previous analysis settles.</p>
+                  <h5 class="text-xs font-bold text-zinc-700">Section Locked</h5>
+                  <p class="text-[11px] text-zinc-400 max-w-[200px] leading-relaxed mt-1">This stage renders dynamically as the previous analysis completes.</p>
                 </div>
               </transition>
             </div>
@@ -838,10 +878,10 @@ watch(() => scopeStore.isStreaming, (streaming) => {
           </transition>
 
           <!-- Export Actions -->
-          <div v-if="hasDocument" class="flex justify-end gap-2.5 border-t border-zinc-150 pt-4 mt-2">
+          <div v-if="hasDocument" class="flex flex-wrap justify-end gap-2 border-t border-zinc-100 pt-3.5 mt-1 shrink-0">
             <button
               type="button"
-              class="rounded-lg text-[13px] font-semibold py-2 px-4.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 cursor-pointer transition-all duration-150 flex items-center gap-2"
+              class="inline-flex items-center gap-1.5 rounded-lg text-xs font-semibold py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-950 cursor-pointer transition-all duration-150 active:scale-[0.97] shadow-xs"
               @click="copyToClipboard"
             >
               <i :class="isCopied ? 'pi pi-check text-emerald-600' : 'pi pi-copy'"></i>
@@ -849,7 +889,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
             </button>
             <button
               type="button"
-              class="rounded-lg text-[13px] font-semibold py-2 px-4.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 cursor-pointer transition-all duration-150 flex items-center gap-2"
+              class="inline-flex items-center gap-1.5 rounded-lg text-xs font-semibold py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-950 cursor-pointer transition-all duration-150 active:scale-[0.97] shadow-xs"
               @click="copyRichText"
             >
               <i class="pi pi-copy text-indigo-500"></i>
@@ -857,7 +897,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
             </button>
             <button
               type="button"
-              class="rounded-lg text-[13px] font-semibold py-2 px-4.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 cursor-pointer transition-all duration-150 flex items-center gap-2"
+              class="inline-flex items-center gap-1.5 rounded-lg text-xs font-semibold py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-950 cursor-pointer transition-all duration-150 active:scale-[0.97] shadow-xs"
               @click="exportToGoogleDoc"
             >
               <i class="pi pi-external-link text-blue-500"></i>
@@ -865,11 +905,11 @@ watch(() => scopeStore.isStreaming, (streaming) => {
             </button>
             <button
               type="button"
-              class="rounded-lg text-[13px] font-semibold py-2 px-4.5 bg-zinc-950 hover:bg-zinc-900 text-white border-none cursor-pointer transition-all duration-150 flex items-center gap-2 shadow-sm"
+              class="inline-flex items-center gap-1.5 rounded-lg text-xs font-semibold py-1.5 px-3.5 bg-zinc-950 hover:bg-zinc-800 text-white border-none cursor-pointer transition-all duration-150 active:scale-[0.97] shadow-sm"
               @click="downloadDocument"
             >
               <i class="pi pi-download"></i>
-              Download Markdown
+              Download
             </button>
           </div>
 
@@ -880,75 +920,70 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 </template>
 
 <style scoped>
-/* Shimmering Loading Animation */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+/* Badge fade transition */
+.badge-fade-enter-active,
+.badge-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-.shimmer-block {
-  background: linear-gradient(90deg, #f4f4f5 25%, #e4e4e7 50%, #f4f4f5 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+.badge-fade-enter-from,
+.badge-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
 }
 
 /* Base prose text styles for document rendering */
 :deep(.scope-prose) {
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
   line-height: 1.75;
   color: #27272a;
 }
 
 :deep(.scope-prose) p {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.1rem;
   color: #27272a;
 }
 
 :deep(.scope-prose) h2 {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 850;
   color: #09090b;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+  margin-top: 1.75rem;
+  margin-bottom: 0.875rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #f4f4f5;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
   font-family: system-ui, -apple-system, sans-serif;
 }
 
 :deep(.scope-prose) h3 {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 750;
   color: #09090b;
-  margin-top: 1.75rem;
-  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.625rem;
   letter-spacing: -0.015em;
 }
 
 :deep(.scope-prose) h4 {
-  font-size: 0.825rem;
+  font-size: 0.8125rem;
   font-weight: 800;
   color: #71717a;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.4rem;
 }
 
 :deep(.scope-prose) ul {
   padding-left: 1.25rem;
   margin-top: 0.5rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.1rem;
   list-style-type: none;
 }
 
 :deep(.scope-prose) li {
   position: relative;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   padding-left: 1.25rem;
   color: #27272a;
 }
@@ -969,37 +1004,37 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 :deep(.scope-prose) hr {
   border: 0;
   border-top: 1px solid #e4e4e7;
-  margin: 2rem 0;
+  margin: 1.75rem 0;
 }
 
 :deep(.scope-inline-code) {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.85em;
+  font-size: 0.84em;
   background-color: #f4f4f5;
   color: #18181b;
   padding: 0.15rem 0.35rem;
-  border-radius: 6px;
+  border-radius: 5px;
   border: 1px solid rgba(9, 9, 11, 0.06);
 }
 
 /* Classification Card styling */
 :deep(.classification-card) {
-  margin-bottom: 1.5rem;
-  padding: 1.15rem 1.25rem;
-  border-radius: 12px;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.125rem;
+  border-radius: 10px;
   border: 1px solid #e4e4e7;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   background-color: #fafafa;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 :deep(.classification-card:hover) {
   border-color: #d4d4d8;
-  box-shadow: 0 4px 12px rgba(9, 9, 11, 0.02);
+  box-shadow: 0 3px 10px rgba(9, 9, 11, 0.03);
 }
 
 :deep(.classification-card.classification-low .card-value) {
@@ -1024,33 +1059,22 @@ watch(() => scopeStore.isStreaming, (streaming) => {
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   color: #52525b;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-:deep(.classification-card .card-label i) {
-  font-size: 1rem;
-}
-
-:deep(.classification-card.classification-low .card-label i) {
-  color: #10b981;
-}
-
-:deep(.classification-card.classification-medium .card-label i) {
-  color: #f59e0b;
-}
-
-:deep(.classification-card.classification-high .card-label i) {
-  color: #ef4444;
-}
+:deep(.classification-card .card-label i) { font-size: 1rem; }
+:deep(.classification-card.classification-low  .card-label i) { color: #10b981; }
+:deep(.classification-card.classification-medium .card-label i) { color: #f59e0b; }
+:deep(.classification-card.classification-high  .card-label i) { color: #ef4444; }
 
 :deep(.classification-card .card-value) {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 800;
-  padding: 0.25rem 0.75rem;
+  padding: 0.2rem 0.7rem;
   border-radius: 9999px;
   background-color: #ffffff;
   border: 1px solid #e4e4e7;
@@ -1058,51 +1082,51 @@ watch(() => scopeStore.isStreaming, (streaming) => {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
-/* Rationale block styling */
+/* Rationale block */
 :deep(.rationale-card) {
-  padding: 1.25rem;
+  padding: 1.125rem;
   background-color: #fafafa;
   border: 1px solid #e4e4e7;
-  border-radius: 12px;
-  margin-top: 1.25rem;
-  margin-bottom: 1.5rem;
+  border-radius: 10px;
+  margin-top: 1rem;
+  margin-bottom: 1.25rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 :deep(.rationale-card .rationale-label) {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 800;
   color: #a1a1aa;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 :deep(.rationale-card .rationale-text) {
   color: #27272a;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   line-height: 1.65;
   margin: 0;
 }
 
-/* Risk Card design */
+/* Risk Card */
 :deep(.risk-card) {
-  margin-bottom: 1.5rem;
-  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  padding: 1.125rem;
   border: 1px solid #e4e4e7;
   background-color: #ffffff;
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01), 0 1px 2px rgba(0, 0, 0, 0.02);
-  transition: all 0.2s ease;
+  gap: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 :deep(.risk-card:hover) {
   border-color: #d4d4d8;
-  box-shadow: 0 4px 16px rgba(9, 9, 11, 0.025);
+  box-shadow: 0 4px 12px rgba(9, 9, 11, 0.03);
 }
 
 :deep(.risk-card .risk-row), :deep(.risk-card .mitigation-row) {
@@ -1113,15 +1137,15 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 
 :deep(.risk-card .risk-badge), :deep(.risk-card .mitigation-badge) {
   flex-shrink: 0;
-  width: 5.8rem;
+  width: 5.5rem;
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 0.2rem 0.6rem;
-  border-radius: 6px;
-  margin-top: 0.125rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 5px;
+  margin-top: 0.1rem;
 }
 
 :deep(.risk-card .risk-badge) {
@@ -1137,7 +1161,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 }
 
 :deep(.risk-card .risk-text) {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 700;
   color: #18181b;
   line-height: 1.6;
@@ -1145,7 +1169,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 }
 
 :deep(.risk-card .mitigation-text) {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   color: #52525b;
   line-height: 1.6;
   margin: 0;
@@ -1153,15 +1177,15 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 
 :deep(.risk-card .mitigation-row) {
   border-top: 1px solid #f4f4f5;
-  padding-top: 0.875rem;
+  padding-top: 0.75rem;
 }
 
-/* Premium Table design */
+/* Premium Table */
 :deep(.table-container) {
   overflow-x: auto;
-  margin: 1.5rem 0;
+  margin: 1.25rem 0;
   border: 1px solid #e4e4e7;
-  border-radius: 12px;
+  border-radius: 10px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
@@ -1178,28 +1202,27 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 }
 
 :deep(.scope-table th) {
-  padding: 0.75rem 1rem;
+  padding: 0.625rem 0.875rem;
   font-weight: 700;
   color: #52525b;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 :deep(.scope-table td) {
-  padding: 0.875rem 1rem;
+  padding: 0.75rem 0.875rem;
   border-bottom: 1px solid #f4f4f5;
   color: #27272a;
   vertical-align: top;
   line-height: 1.5;
+  transition: background-color 0.1s ease;
 }
 
-:deep(.scope-table tr:last-child td) {
-  border-bottom: none;
-}
+:deep(.scope-table tr:last-child td) { border-bottom: none; }
 
 :deep(.scope-table tr:hover td) {
-  background-color: rgba(250, 250, 250, 0.5);
+  background-color: #f9f9f9;
 }
 
 /* Tab Fade and View Fade Transitions */
@@ -1207,7 +1230,9 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 .tab-fade-leave-active,
 .view-fade-enter-active,
 .view-fade-leave-active {
-  transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tab-fade-enter-from,
@@ -1215,23 +1240,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 .view-fade-enter-from,
 .view-fade-leave-to {
   opacity: 0;
-  transform: translateY(4px);
-}
-
-/* Empty state fade-in-up */
-.animate-fade-in-up {
-  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  transform: translateY(3px);
 }
 </style>
 

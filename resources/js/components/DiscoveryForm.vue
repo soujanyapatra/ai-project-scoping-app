@@ -95,146 +95,161 @@ const onReset = () => {
 
 <template>
   <div :class="[
-    'rounded-xl border border-zinc-200 bg-white transition-all duration-200',
-    isSidebar ? 'border-none bg-transparent' : 'shadow-md overflow-hidden'
+    'transition-all duration-200',
+    isSidebar ? '' : 'rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden'
   ]">
-    <!-- Header (landing only) -->
-    <div v-if="!isSidebar" class="px-6 py-4.5 border-b border-zinc-100 flex items-center justify-between">
+    <!-- Header (landing card only) -->
+    <div v-if="!isSidebar" class="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-white">
       <div>
-        <h2 class="text-sm font-bold text-zinc-950 tracking-tight">{{ t('discovery.title') }}</h2>
-        <p class="text-xs text-zinc-400 mt-0.5">Specify your application requirements below</p>
+        <h2 class="text-[13.5px] font-bold text-zinc-950 tracking-tight">{{ t('discovery.title') }}</h2>
+        <p class="text-[12px] text-zinc-400 mt-0.5">Fill in your project requirements below</p>
       </div>
       <div class="flex items-center gap-1.5">
-        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-        <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Builder</span>
+        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+        <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Builder</span>
       </div>
     </div>
 
-    <div :class="isSidebar ? 'p-0' : 'p-6 sm:p-8'">
-      <form class="flex flex-col gap-5.5" novalidate @submit.prevent="onSubmit">
+    <div :class="isSidebar ? 'pt-1' : 'p-6'">
+      <form class="flex flex-col gap-6" novalidate @submit.prevent="onSubmit">
 
-        <!-- Section 1: Core parameters -->
+        <!-- Section 1: Core -->
         <div class="flex flex-col gap-4">
           <div class="flex items-center gap-2">
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">Core Parameters</span>
+            <span class="text-[11px] font-semibold text-zinc-400 tracking-widest uppercase whitespace-nowrap">Core Parameters</span>
             <div class="h-px bg-zinc-100 flex-grow"></div>
           </div>
 
-          <fieldset :class="isSidebar ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-1 gap-4.5 md:grid-cols-2'">
+          <fieldset :class="isSidebar ? 'grid grid-cols-1 gap-3.5' : 'grid grid-cols-1 gap-4 md:grid-cols-2'">
             <legend class="sr-only">Core project details</legend>
 
-            <div class="flex flex-col gap-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.projectType') }}</span>
+            <!-- Project Type -->
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.projectType') }}</label>
               <Dropdown v-model="scopeStore.projectType" :options="projectTypeOptions" optionLabel="label" optionValue="value" :invalid="!!formErrors.projectType" class="w-full" />
               <transition name="form-error">
-                <small v-if="formErrors.projectType" class="text-xs text-red-500">{{ formErrors.projectType }}</small>
+                <small v-if="formErrors.projectType" class="text-[11px] text-red-500 mt-0.5">{{ formErrors.projectType }}</small>
               </transition>
             </div>
 
-            <div class="flex flex-col gap-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.industry') }}</span>
+            <!-- Industry -->
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.industry') }}</label>
               <InputText v-model="scopeStore.industry" :invalid="!!formErrors.industry" class="w-full" placeholder="e.g. Healthcare, Fintech, SaaS" />
               <transition name="form-error">
-                <small v-if="formErrors.industry" class="text-xs text-red-500">{{ formErrors.industry }}</small>
+                <small v-if="formErrors.industry" class="text-[11px] text-red-500 mt-0.5">{{ formErrors.industry }}</small>
               </transition>
             </div>
 
-            <div class="flex flex-col gap-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.budgetUsd') }}</span>
+            <!-- Budget -->
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.budgetUsd') }}</label>
               <InputNumber v-model="scopeStore.budgetUsd" :min="0" mode="currency" currency="USD" locale="en-US" :invalid="!!formErrors.budgetUsd" class="w-full" placeholder="$0.00" />
               <transition name="form-error">
-                <small v-if="formErrors.budgetUsd" class="text-xs text-red-500">{{ formErrors.budgetUsd }}</small>
+                <small v-if="formErrors.budgetUsd" class="text-[11px] text-red-500 mt-0.5">{{ formErrors.budgetUsd }}</small>
               </transition>
             </div>
 
-            <div class="flex flex-col gap-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.platforms') }}</span>
+            <!-- Platforms -->
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.platforms') }}</label>
               <MultiSelect v-model="scopeStore.platforms" :options="platformOptions" optionLabel="label" optionValue="value" display="chip" :invalid="!!formErrors.platforms" class="w-full" />
               <transition name="form-error">
-                <small v-if="formErrors.platforms" class="text-xs text-red-500">{{ formErrors.platforms }}</small>
+                <small v-if="formErrors.platforms" class="text-[11px] text-red-500 mt-0.5">{{ formErrors.platforms }}</small>
               </transition>
             </div>
 
-            <div class="flex flex-col gap-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.timelineStart') }}</span>
-              <DatePicker v-model="scopeStore.timelineStart" showIcon :invalid="!!formErrors.timelineStart" class="w-full" placeholder="Select start date" />
+            <!-- Timeline Start -->
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.timelineStart') }}</label>
+              <DatePicker v-model="scopeStore.timelineStart" showIcon :invalid="!!formErrors.timelineStart" class="w-full" placeholder="Start date" />
               <transition name="form-error">
-                <small v-if="formErrors.timelineStart" class="text-xs text-red-500">{{ formErrors.timelineStart }}</small>
+                <small v-if="formErrors.timelineStart" class="text-[11px] text-red-500 mt-0.5">{{ formErrors.timelineStart }}</small>
               </transition>
             </div>
 
-            <div class="flex flex-col gap-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.timelineEnd') }}</span>
-              <DatePicker v-model="scopeStore.timelineEnd" showIcon :invalid="!!formErrors.timelineEnd" class="w-full" placeholder="Select end date" />
+            <!-- Timeline End -->
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.timelineEnd') }}</label>
+              <DatePicker v-model="scopeStore.timelineEnd" showIcon :invalid="!!formErrors.timelineEnd" class="w-full" placeholder="End date" />
               <transition name="form-error">
-                <small v-if="formErrors.timelineEnd" class="text-xs text-red-500">{{ formErrors.timelineEnd }}</small>
+                <small v-if="formErrors.timelineEnd" class="text-[11px] text-red-500 mt-0.5">{{ formErrors.timelineEnd }}</small>
               </transition>
             </div>
           </fieldset>
         </div>
 
-        <!-- Section 2: Specification details -->
+        <!-- Section 2: Specifications -->
         <div class="flex flex-col gap-4">
           <div class="flex items-center gap-2">
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">Specifications</span>
+            <span class="text-[11px] font-semibold text-zinc-400 tracking-widest uppercase whitespace-nowrap">Specifications</span>
             <div class="h-px bg-zinc-100 flex-grow"></div>
           </div>
 
-          <fieldset class="flex flex-col gap-4.5">
-            <legend class="sr-only">Scope details</legend>
+          <fieldset class="flex flex-col gap-4">
+            <legend class="sr-only">Scope specifications</legend>
 
-            <div class="flex flex-col gap-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.features') }}</span>
-              <Chips v-model="scopeStore.features" :invalid="!!formErrors.features" class="w-full" placeholder="Type and press Enter..." />
-              <div class="flex justify-between items-center mt-1">
-                <small class="text-[10px] text-zinc-400">{{ t('discovery.featuresHint') }}</small>
+            <!-- Features -->
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.features') }}</label>
+              <Chips v-model="scopeStore.features" :invalid="!!formErrors.features" class="w-full" placeholder="Type feature and press Enter" />
+              <div class="flex justify-between items-center mt-0.5">
+                <small class="text-[11px] text-zinc-400">{{ t('discovery.featuresHint') }}</small>
                 <transition name="form-error">
-                  <small v-if="formErrors.features" class="text-xs text-red-500">{{ formErrors.features }}</small>
+                  <small v-if="formErrors.features" class="text-[11px] text-red-500">{{ formErrors.features }}</small>
                 </transition>
               </div>
             </div>
 
-            <div class="flex flex-col gap-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.integrations') }}</span>
-              <Chips v-model="scopeStore.integrations" class="w-full" placeholder="e.g. Stripe, Auth0, Twilio..." />
+            <!-- Integrations -->
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.integrations') }}</label>
+              <Chips v-model="scopeStore.integrations" class="w-full" placeholder="e.g. Stripe, Auth0, Twilio" />
             </div>
 
-            <div class="flex flex-col gap-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.constraints') }}</span>
-              <Textarea v-model="scopeStore.constraints" rows="2" class="w-full resize-none" placeholder="e.g. strict budget bounds, HIPAA compliance, legacy database migration..." />
+            <!-- Constraints -->
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.constraints') }}</label>
+              <Textarea v-model="scopeStore.constraints" rows="2" class="w-full resize-none" placeholder="e.g. HIPAA compliance, SOC2, legacy systems..." />
             </div>
 
-            <div class="flex flex-col gap-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ t('discovery.fields.successCriteria') }}</span>
-              <Textarea v-model="scopeStore.successCriteria" rows="2" class="w-full resize-none" placeholder="e.g. < 200ms latency, handles 10k concurrent users..." />
+            <!-- Success Criteria -->
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.successCriteria') }}</label>
+              <Textarea v-model="scopeStore.successCriteria" rows="2" class="w-full resize-none" placeholder="e.g. < 200ms latency, 10k concurrent users..." />
             </div>
           </fieldset>
         </div>
 
-        <!-- Action Footer -->
-        <footer class="flex justify-end gap-2.5 border-t border-zinc-150 pt-4 mt-2">
+        <!-- Footer -->
+        <footer class="flex justify-end gap-2 pt-3 border-t border-zinc-100">
           <button
             type="button"
-            class="rounded-lg text-[13px] font-semibold py-2 px-4 text-zinc-700 border border-zinc-200 bg-white hover:bg-zinc-50 hover:text-zinc-900 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 cursor-pointer transition-all duration-150 disabled:opacity-40"
+            class="inline-flex items-center gap-1.5 rounded-lg text-[12.5px] font-semibold h-9 px-3.5 text-zinc-600 border border-zinc-200 bg-white hover:bg-zinc-50 hover:text-zinc-900 hover:border-zinc-300 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 cursor-pointer transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
             :disabled="scopeStore.isInitiating || scopeStore.isStreaming"
             @click="onReset"
           >
-            {{ t('discovery.reset') }}
+            Reset
           </button>
-          
+
           <button
             type="submit"
             :disabled="!canSubmit"
-            class="rounded-lg bg-zinc-950 hover:bg-zinc-900 text-white text-[13px] font-semibold py-2 px-4.5 border-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 cursor-pointer transition-all duration-150 disabled:opacity-40 shadow-sm flex items-center gap-2"
+            class="relative inline-flex items-center gap-2 rounded-lg bg-zinc-950 hover:bg-zinc-800 text-white text-[12.5px] font-semibold h-9 px-4 border-none active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 cursor-pointer transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
           >
-            <i v-if="scopeStore.isInitiating" class="pi pi-spin pi-spinner text-xs"></i>
-            {{ scopeStore.isInitiating ? 'Analyzing...' : t('discovery.submit') }}
+            <span v-if="scopeStore.isInitiating" class="spinner w-3.5 h-3.5 border-white/30 border-t-white"></span>
+            <svg v-else class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            {{ scopeStore.isInitiating ? 'Generating...' : t('discovery.submit') }}
           </button>
         </footer>
+
       </form>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 /* Transition & Micro-interactions for PrimeVue Form Controls */
@@ -244,7 +259,10 @@ const onReset = () => {
 :deep(.p-inputtext),
 :deep(.p-chips),
 :deep(.p-textarea) {
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition:
+    border-color 0.12s ease,
+    box-shadow 0.12s ease,
+    background-color 0.12s ease !important;
   border-radius: 8px !important;
 }
 
@@ -254,7 +272,8 @@ const onReset = () => {
 :deep(.p-inputtext:hover),
 :deep(.p-chips:hover),
 :deep(.p-textarea:hover) {
-  border-color: #011268 !important; /* Brand 600 color */
+  border-color: #d4d4d8 !important;
+  background-color: #fafafa !important;
 }
 
 :deep(.p-dropdown:focus-within),
@@ -263,33 +282,60 @@ const onReset = () => {
 :deep(.p-inputtext:focus),
 :deep(.p-chips:focus-within),
 :deep(.p-textarea:focus) {
-  border-color: #011268 !important;
-  box-shadow: 0 0 0 3px rgba(1, 18, 104, 0.1) !important;
+  border-color: #09090b !important;
+  box-shadow: 0 0 0 3px rgba(9, 9, 11, 0.08) !important;
+  background-color: #ffffff !important;
+}
+
+/* Brand hover variant */
+:deep(.p-dropdown.p-focus),
+:deep(.p-multiselect.p-focus) {
+  border-color: #09090b !important;
+  box-shadow: 0 0 0 3px rgba(9, 9, 11, 0.08) !important;
 }
 
 /* Invalid State Animation */
 :deep(.p-invalid) {
   border-color: #ef4444 !important;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
-  animation: shake 0.4s ease-in-out;
+  animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  20%       { transform: translateX(-5px); }
+  40%       { transform: translateX(5px); }
+  60%       { transform: translateX(-3px); }
+  80%       { transform: translateX(3px); }
+}
+
+/* Spinner override */
+.spinner {
+  display: inline-block;
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.65s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Form error message transition */
 .form-error-enter-active,
 .form-error-leave-active {
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  max-height: 24px;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 }
 .form-error-enter-from,
 .form-error-leave-to {
   opacity: 0;
   max-height: 0;
-  transform: translateY(-4px);
+  transform: translateY(-3px);
+}
+.form-error-enter-to,
+.form-error-leave-from {
+  opacity: 1;
+  max-height: 32px;
 }
 </style>
