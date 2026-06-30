@@ -30,6 +30,7 @@ export const useScopeStore = defineStore('scope', () => {
   const sections = ref<StreamSection[]>([])
   const isStreaming = ref(false)
   const streamError = ref<string | null>(null)
+  const workspaceActive = ref(false)
 
   const payload = computed<DiscoveryFormPayload>(() => ({
     projectType: projectType.value,
@@ -60,6 +61,7 @@ export const useScopeStore = defineStore('scope', () => {
     sections.value = []
     isStreaming.value = false
     streamError.value = null
+    workspaceActive.value = false
   }
 
   const clearOutput = () => {
@@ -70,6 +72,7 @@ export const useScopeStore = defineStore('scope', () => {
 
   const initiateScope = async () => {
     isInitiating.value = true
+    workspaceActive.value = true
     streamError.value = null
     try {
       const res = await api.post<ScopeInitiateResponse>('/api/scope', payload.value)
@@ -77,6 +80,10 @@ export const useScopeStore = defineStore('scope', () => {
       streamUrl.value = res.data.streamUrl
       return res.data
     } catch (error) {
+      // If initiation fails and we don't have any sections, go back to landing page
+      if (sections.value.length === 0) {
+        workspaceActive.value = false
+      }
       showError(getApiErrorMessage(error))
       throw error
     } finally {
@@ -94,6 +101,6 @@ export const useScopeStore = defineStore('scope', () => {
     sections.value.push(next)
   }
 
-  return { projectType, industry, budgetUsd, timelineStart, timelineEnd, features, platforms, integrations, constraints, successCriteria, sessionId, streamUrl, isInitiating, sections, isStreaming, streamError, clearOutput, appendSection, initiateScope, reset }
+  return { projectType, industry, budgetUsd, timelineStart, timelineEnd, features, platforms, integrations, constraints, successCriteria, sessionId, streamUrl, isInitiating, sections, isStreaming, streamError, workspaceActive, clearOutput, appendSection, initiateScope, reset }
 })
 

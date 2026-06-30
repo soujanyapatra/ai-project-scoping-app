@@ -96,28 +96,28 @@ const onReset = () => {
 <template>
   <div :class="[
     'transition-all duration-200',
-    isSidebar ? '' : 'rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden'
+    isSidebar ? '' : 'rounded-2xl border border-zinc-200/80 bg-white shadow-[0_1px_3px_rgba(9,9,11,0.04),0_8px_24px_rgba(9,9,11,0.04)] overflow-hidden'
   ]">
     <!-- Header (landing card only) -->
     <div v-if="!isSidebar" class="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-white">
       <div>
-        <h2 class="text-[13.5px] font-bold text-zinc-950 tracking-tight">{{ t('discovery.title') }}</h2>
-        <p class="text-[12px] text-zinc-400 mt-0.5">Fill in your project requirements below</p>
+        <h2 class="text-[14px] font-bold text-zinc-950 tracking-tight">{{ t('discovery.title') }}</h2>
+        <p class="text-[12px] text-zinc-500 mt-0.5">Fill in your project requirements below</p>
       </div>
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-50/80 border border-emerald-100">
         <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-        <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Builder</span>
+        <span class="text-[10px] font-semibold text-emerald-700 uppercase tracking-widest">Builder</span>
       </div>
     </div>
 
-    <div :class="isSidebar ? 'pt-1' : 'p-6'">
-      <form class="flex flex-col gap-6" novalidate @submit.prevent="onSubmit">
+    <div :class="isSidebar ? 'pt-1' : 'p-6 sm:p-7'">
+      <form class="flex flex-col gap-7" novalidate @submit.prevent="onSubmit">
 
         <!-- Section 1: Core -->
         <div class="flex flex-col gap-4">
-          <div class="flex items-center gap-2">
-            <span class="text-[11px] font-semibold text-zinc-400 tracking-widest uppercase whitespace-nowrap">Core Parameters</span>
-            <div class="h-px bg-zinc-100 flex-grow"></div>
+          <div class="flex items-center gap-2.5">
+            <span class="text-[11px] font-semibold text-zinc-500 tracking-[0.08em] uppercase whitespace-nowrap">Core Parameters</span>
+            <div class="h-px bg-zinc-200/60 flex-grow"></div>
           </div>
 
           <fieldset :class="isSidebar ? 'grid grid-cols-1 gap-3.5' : 'grid grid-cols-1 gap-4 md:grid-cols-2'">
@@ -125,7 +125,7 @@ const onReset = () => {
 
             <!-- Project Type -->
             <div class="flex flex-col gap-1">
-              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.projectType') }}</label>
+              <label class="text-[12px] font-medium text-zinc-700">{{ t('discovery.fields.projectType') }}</label>
               <Dropdown v-model="scopeStore.projectType" :options="projectTypeOptions" optionLabel="label" optionValue="value" :invalid="!!formErrors.projectType" class="w-full" />
               <transition name="form-error">
                 <small v-if="formErrors.projectType" class="text-[11px] text-red-500 mt-0.5">{{ formErrors.projectType }}</small>
@@ -134,7 +134,7 @@ const onReset = () => {
 
             <!-- Industry -->
             <div class="flex flex-col gap-1">
-              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.industry') }}</label>
+              <label class="text-[12px] font-medium text-zinc-700">{{ t('discovery.fields.industry') }}</label>
               <InputText v-model="scopeStore.industry" :invalid="!!formErrors.industry" class="w-full" placeholder="e.g. Healthcare, Fintech, SaaS" />
               <transition name="form-error">
                 <small v-if="formErrors.industry" class="text-[11px] text-red-500 mt-0.5">{{ formErrors.industry }}</small>
@@ -143,7 +143,7 @@ const onReset = () => {
 
             <!-- Budget -->
             <div class="flex flex-col gap-1">
-              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.budgetUsd') }}</label>
+              <label class="text-[12px] font-medium text-zinc-700">{{ t('discovery.fields.budgetUsd') }}</label>
               <InputNumber v-model="scopeStore.budgetUsd" :min="0" mode="currency" currency="USD" locale="en-US" :invalid="!!formErrors.budgetUsd" class="w-full" placeholder="$0.00" />
               <transition name="form-error">
                 <small v-if="formErrors.budgetUsd" class="text-[11px] text-red-500 mt-0.5">{{ formErrors.budgetUsd }}</small>
@@ -152,7 +152,7 @@ const onReset = () => {
 
             <!-- Platforms -->
             <div class="flex flex-col gap-1">
-              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.platforms') }}</label>
+              <label class="text-[12px] font-medium text-zinc-700">{{ t('discovery.fields.platforms') }}</label>
               <MultiSelect v-model="scopeStore.platforms" :options="platformOptions" optionLabel="label" optionValue="value" display="chip" :invalid="!!formErrors.platforms" class="w-full" />
               <transition name="form-error">
                 <small v-if="formErrors.platforms" class="text-[11px] text-red-500 mt-0.5">{{ formErrors.platforms }}</small>
@@ -161,7 +161,7 @@ const onReset = () => {
 
             <!-- Timeline Start -->
             <div class="flex flex-col gap-1">
-              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.timelineStart') }}</label>
+              <label class="text-[12px] font-medium text-zinc-700">{{ t('discovery.fields.timelineStart') }}</label>
               <DatePicker v-model="scopeStore.timelineStart" showIcon :invalid="!!formErrors.timelineStart" class="w-full" placeholder="Start date" />
               <transition name="form-error">
                 <small v-if="formErrors.timelineStart" class="text-[11px] text-red-500 mt-0.5">{{ formErrors.timelineStart }}</small>
@@ -170,7 +170,7 @@ const onReset = () => {
 
             <!-- Timeline End -->
             <div class="flex flex-col gap-1">
-              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.timelineEnd') }}</label>
+              <label class="text-[12px] font-medium text-zinc-700">{{ t('discovery.fields.timelineEnd') }}</label>
               <DatePicker v-model="scopeStore.timelineEnd" showIcon :invalid="!!formErrors.timelineEnd" class="w-full" placeholder="End date" />
               <transition name="form-error">
                 <small v-if="formErrors.timelineEnd" class="text-[11px] text-red-500 mt-0.5">{{ formErrors.timelineEnd }}</small>
@@ -181,9 +181,9 @@ const onReset = () => {
 
         <!-- Section 2: Specifications -->
         <div class="flex flex-col gap-4">
-          <div class="flex items-center gap-2">
-            <span class="text-[11px] font-semibold text-zinc-400 tracking-widest uppercase whitespace-nowrap">Specifications</span>
-            <div class="h-px bg-zinc-100 flex-grow"></div>
+          <div class="flex items-center gap-2.5">
+            <span class="text-[11px] font-semibold text-zinc-500 tracking-[0.08em] uppercase whitespace-nowrap">Specifications</span>
+            <div class="h-px bg-zinc-200/60 flex-grow"></div>
           </div>
 
           <fieldset class="flex flex-col gap-4">
@@ -191,7 +191,7 @@ const onReset = () => {
 
             <!-- Features -->
             <div class="flex flex-col gap-1">
-              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.features') }}</label>
+              <label class="text-[12px] font-medium text-zinc-700">{{ t('discovery.fields.features') }}</label>
               <Chips v-model="scopeStore.features" :invalid="!!formErrors.features" class="w-full" placeholder="Type feature and press Enter" />
               <div class="flex justify-between items-center mt-0.5">
                 <small class="text-[11px] text-zinc-400">{{ t('discovery.featuresHint') }}</small>
@@ -203,29 +203,29 @@ const onReset = () => {
 
             <!-- Integrations -->
             <div class="flex flex-col gap-1">
-              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.integrations') }}</label>
+              <label class="text-[12px] font-medium text-zinc-700">{{ t('discovery.fields.integrations') }}</label>
               <Chips v-model="scopeStore.integrations" class="w-full" placeholder="e.g. Stripe, Auth0, Twilio" />
             </div>
 
             <!-- Constraints -->
             <div class="flex flex-col gap-1">
-              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.constraints') }}</label>
+              <label class="text-[12px] font-medium text-zinc-700">{{ t('discovery.fields.constraints') }}</label>
               <Textarea v-model="scopeStore.constraints" rows="2" class="w-full resize-none" placeholder="e.g. HIPAA compliance, SOC2, legacy systems..." />
             </div>
 
             <!-- Success Criteria -->
             <div class="flex flex-col gap-1">
-              <label class="text-[12px] font-medium text-zinc-600">{{ t('discovery.fields.successCriteria') }}</label>
+              <label class="text-[12px] font-medium text-zinc-700">{{ t('discovery.fields.successCriteria') }}</label>
               <Textarea v-model="scopeStore.successCriteria" rows="2" class="w-full resize-none" placeholder="e.g. < 200ms latency, 10k concurrent users..." />
             </div>
           </fieldset>
         </div>
 
         <!-- Footer -->
-        <footer class="flex justify-end gap-2 pt-3 border-t border-zinc-100">
+        <footer class="flex justify-end gap-2.5 pt-4 border-t border-zinc-100">
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-lg text-[12.5px] font-semibold h-9 px-3.5 text-zinc-600 border border-zinc-200 bg-white hover:bg-zinc-50 hover:text-zinc-900 hover:border-zinc-300 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 cursor-pointer transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+            class="inline-flex items-center gap-1.5 rounded-lg text-[12.5px] font-semibold h-9 px-4 text-zinc-600 border border-zinc-200 bg-white hover:bg-zinc-50 hover:text-zinc-900 hover:border-zinc-300 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 cursor-pointer transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
             :disabled="scopeStore.isInitiating || scopeStore.isStreaming"
             @click="onReset"
           >
@@ -235,7 +235,7 @@ const onReset = () => {
           <button
             type="submit"
             :disabled="!canSubmit"
-            class="relative inline-flex items-center gap-2 rounded-lg bg-zinc-950 hover:bg-zinc-800 text-white text-[12.5px] font-semibold h-9 px-4 border-none active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 cursor-pointer transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+            class="relative inline-flex items-center gap-2 rounded-lg bg-zinc-950 hover:bg-zinc-800 text-white text-[12.5px] font-semibold h-9 px-5 border-none active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 cursor-pointer transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_1px_2px_rgba(9,9,11,0.15),0_4px_12px_rgba(9,9,11,0.12)]"
           >
             <span v-if="scopeStore.isInitiating" class="spinner w-3.5 h-3.5 border-white/30 border-t-white"></span>
             <svg v-else class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -337,5 +337,47 @@ const onReset = () => {
 .form-error-leave-from {
   opacity: 1;
   max-height: 32px;
+}
+
+/* Custom DatePicker inputs & trigger styling */
+:deep(.p-datepicker) {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+}
+
+:deep(.p-datepicker .p-inputtext) {
+  padding-right: 2.5rem !important;
+  width: 100%;
+}
+
+:deep(.p-datepicker-dropdown) {
+  position: absolute !important;
+  right: 0.25rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  background: transparent !important;
+  border: none !important;
+  color: #71717a !important; /* zinc-500 */
+  box-shadow: none !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  padding: 0 !important;
+  min-width: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+}
+
+:deep(.p-datepicker-dropdown:hover) {
+  color: #18181b !important; /* zinc-900 */
+}
+
+/* Ensure the icon inside is sized correctly */
+:deep(.p-datepicker-dropdown .p-icon) {
+  width: 1rem !important;
+  height: 1rem !important;
 }
 </style>

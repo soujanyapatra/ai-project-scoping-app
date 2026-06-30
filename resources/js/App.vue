@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import AppHeader from '@/components/AppHeader.vue'
 import DiscoveryForm from '@/components/DiscoveryForm.vue'
 import ScopeOutput from '@/components/ScopeOutput.vue'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Toast } from '@/lib/primevue'
 import { useScopeStore } from '@/stores/useScopeStore'
@@ -10,8 +11,10 @@ const { t } = useI18n()
 const scopeStore = useScopeStore()
 
 const hasStarted = computed(() => {
-  return scopeStore.sections.length > 0 || scopeStore.isInitiating || scopeStore.isStreaming
+  return scopeStore.workspaceActive
 })
+
+const selectedPreset = ref<string | null>(null)
 
 const presets = [
   {
@@ -59,6 +62,7 @@ const presets = [
 ]
 
 const applyPreset = (p: typeof presets[0]) => {
+  selectedPreset.value = p.title
   scopeStore.projectType = p.projectType as any
   scopeStore.industry = p.industry
   scopeStore.budgetUsd = p.budgetUsd
@@ -77,69 +81,20 @@ const applyPreset = (p: typeof presets[0]) => {
 
 <template>
   <Toast />
-  <div class="h-screen flex flex-col bg-[#fafafa] text-zinc-900 font-sans antialiased relative overflow-hidden">
+  <div class="h-screen flex flex-col bg-zinc-50 text-zinc-900 font-sans antialiased relative overflow-hidden">
 
-    <!-- Subtle grid background -->
-    <div class="absolute inset-0 bg-[radial-gradient(rgba(0,0,0,0.025)_1px,transparent_0)] bg-[size:20px_20px] pointer-events-none z-0 opacity-60"></div>
-
-    <!-- ─── Navigation ──────────────────────────────────────────── -->
-    <nav class="shrink-0 h-[54px] bg-white/90 backdrop-blur-xl border-b border-zinc-200/60 relative z-20 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-      <div class="mx-auto max-w-7xl px-5 h-full flex items-center justify-between">
-
-        <!-- Brand -->
-        <button
-          type="button"
-          class="flex items-center gap-2.5 select-none group outline-none"
-          @click="scopeStore.reset"
-          title="Go to home"
-        >
-          <!-- Logo mark -->
-          <div class="relative flex items-center justify-center h-[30px] w-[30px] rounded-[8px] bg-zinc-950 shadow-sm group-hover:bg-zinc-800 transition-colors duration-150">
-            <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/>
-            </svg>
-          </div>
-          <!-- Name -->
-          <div class="flex items-baseline gap-1.5">
-            <span class="text-[14px] font-bold tracking-tight text-zinc-950 leading-none">ScopeFlow</span>
-            <span class="text-[9px] font-bold uppercase tracking-widest px-1 py-0.5 rounded bg-zinc-950 text-white leading-none">AI</span>
-          </div>
-        </button>
-
-        <!-- Right side -->
-        <div class="flex items-center gap-3">
-          <!-- Live indicator -->
-          <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/70 select-none">
-            <span class="relative flex h-1.5 w-1.5">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span>
-              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-            </span>
-            <span class="text-[10px] font-semibold text-emerald-700 tracking-wide">Live</span>
-          </div>
-
-          <!-- Divider -->
-          <div class="h-4 w-px bg-zinc-200 hidden sm:block"></div>
-
-          <!-- Avatar -->
-          <div class="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 flex items-center justify-center text-[10px] font-bold text-white select-none ring-1 ring-white ring-offset-1 ring-offset-zinc-100 shadow-sm cursor-default">
-            SF
-          </div>
-        </div>
-
-      </div>
-    </nav>
+    <AppHeader />
 
     <!-- ─── Main ────────────────────────────────────────────────── -->
-    <main class="flex-grow overflow-hidden relative z-10 flex flex-col">
+    <main class="flex-grow min-h-0 overflow-hidden relative z-10 flex flex-col">
       <transition name="layout" mode="out-in">
 
         <!-- ── Landing / Onboarding ── -->
-        <div v-if="!hasStarted" key="landing" class="flex-grow overflow-y-auto flex flex-col items-center justify-center px-5 py-16">
-          <div class="w-full max-w-2xl flex flex-col gap-12">
+        <div v-if="!hasStarted" key="landing" class="flex-grow min-h-0 overflow-y-auto overscroll-contain flex flex-col items-center justify-start px-5 pt-8 pb-16 sm:pt-10 sm:pb-20">
+          <div class="w-full max-w-4xl flex flex-col gap-10 sm:gap-12">
 
             <!-- Hero -->
-            <header class="text-center flex flex-col items-center gap-4">
+            <header class="text-center flex flex-col items-center gap-3.5 sm:gap-4">
               <!-- Badge -->
               <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-zinc-200 shadow-sm text-[11px] font-semibold text-zinc-600 select-none">
                 <svg class="h-3 w-3 text-indigo-500" viewBox="0 0 24 24" fill="currentColor">
@@ -148,18 +103,18 @@ const applyPreset = (p: typeof presets[0]) => {
                 AI-Powered Architecture Scoping
               </div>
 
-              <h1 class="text-[32px] sm:text-[40px] font-extrabold tracking-tight text-zinc-950 leading-[1.1]">
+              <h1 class="text-[28px] sm:text-[38px] font-extrabold tracking-[-0.02em] text-zinc-950 leading-[1.12] max-w-lg">
                 {{ t('app.title') }}
               </h1>
-              <p class="text-[15px] text-zinc-500 max-w-[380px] leading-[1.65]">
+              <p class="text-[14px] sm:text-[15px] text-zinc-500 max-w-md leading-relaxed">
                 {{ t('app.subtitle') }}
               </p>
             </header>
 
             <!-- Templates -->
             <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between mb-0.5">
-                <span class="text-[11px] font-semibold uppercase tracking-widest text-zinc-400">Quick-start templates</span>
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Quick-start templates</span>
                 <span class="text-[11px] text-zinc-400">Auto-fills all fields</span>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -167,7 +122,10 @@ const applyPreset = (p: typeof presets[0]) => {
                   v-for="(p, i) in presets"
                   :key="p.title"
                   type="button"
-                  class="preset-card group text-left rounded-xl border border-zinc-200 bg-white shadow-sm hover:shadow-md hover:border-zinc-300 hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 p-4 flex flex-col gap-3 overflow-hidden animate-fade-in-up"
+                  class="preset-card group text-left rounded-xl border bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 p-4 flex flex-col gap-3 overflow-hidden animate-fade-in-up"
+                  :class="selectedPreset === p.title
+                    ? 'border-zinc-950 shadow-md ring-1 ring-zinc-950/5'
+                    : 'border-zinc-200/90 hover:border-zinc-300'"
                   :style="{ animationDelay: `${i * 60}ms` }"
                   @click="applyPreset(p)"
                 >
@@ -194,8 +152,15 @@ const applyPreset = (p: typeof presets[0]) => {
                   </div>
 
                   <!-- Tags -->
-                  <div class="flex items-center gap-1.5 pt-2.5 border-t border-zinc-100">
-                    <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-zinc-100 text-zinc-500">${{ p.budgetUsd / 1000 }}k</span>
+                  <div class="flex items-center gap-1.5 pt-2.5 border-t border-zinc-100/80">
+                    <span
+                      class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md"
+                      :class="{
+                        'bg-indigo-50 text-indigo-600': p.color === 'indigo',
+                        'bg-violet-50 text-violet-600': p.color === 'violet',
+                        'bg-emerald-50 text-emerald-600': p.color === 'emerald',
+                      }"
+                    >${{ p.budgetUsd / 1000 }}k</span>
                     <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-zinc-100 text-zinc-500 capitalize">{{ p.platforms.join(' + ') }}</span>
                   </div>
                 </button>

@@ -504,13 +504,13 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 </script>
 
 <template>
-  <div class="rounded-xl border border-zinc-200/80 bg-white overflow-hidden shadow-sm h-full flex flex-col">
+  <div class="rounded-2xl border border-zinc-200/80 bg-white overflow-hidden shadow-[0_1px_3px_rgba(9,9,11,0.04),0_8px_24px_rgba(9,9,11,0.04)] h-full flex flex-col">
 
     <!-- Header -->
-    <div class="px-5 py-3.5 border-b border-zinc-100 flex items-center justify-between shrink-0">
+    <div class="px-6 py-4 border-b border-zinc-100 flex items-center justify-between shrink-0 bg-white">
       <div>
-        <h2 class="text-sm font-bold text-zinc-950 tracking-tight">{{ t('output.title') }}</h2>
-        <p class="text-xs text-zinc-400 mt-0.5">Real-time architecture analysis</p>
+        <h2 class="text-[14px] font-bold text-zinc-950 tracking-tight">{{ t('output.title') }}</h2>
+        <p class="text-[12px] text-zinc-500 mt-0.5">Real-time architecture analysis</p>
       </div>
       <div class="flex items-center gap-2">
         <!-- Streaming indicator -->
@@ -538,7 +538,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
     </div>
 
     <!-- Body -->
-    <div class="p-6 flex-grow overflow-hidden flex flex-col">
+    <div class="px-6 py-5 sm:px-7 flex-grow overflow-hidden flex flex-col">
       <section aria-live="polite" class="flex-grow overflow-hidden flex flex-col gap-5">
 
         <!-- Error State -->
@@ -551,7 +551,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
         </div>
 
         <!-- AI Skeleton / Loading State -->
-        <div v-else-if="scopeStore.isInitiating && scopeStore.sections.length === 0" class="flex-grow flex flex-col gap-5 py-2 overflow-y-auto">
+        <div v-else-if="(scopeStore.isInitiating || scopeStore.isStreaming) && scopeStore.sections.length === 0" class="flex-grow flex flex-col gap-5 py-2 overflow-y-auto">
           <!-- AI thinking header -->
           <div class="flex items-center gap-3 p-4 rounded-xl bg-zinc-50/60 border border-zinc-100">
             <div class="h-8 w-8 rounded-lg skeleton shrink-0"></div>
@@ -597,7 +597,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
         </div>
 
         <!-- Premium Empty State -->
-        <div v-else-if="scopeStore.sections.length === 0 && !scopeStore.isInitiating"
+        <div v-else-if="scopeStore.sections.length === 0 && !scopeStore.isInitiating && !scopeStore.isStreaming"
           class="flex-grow border border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-center p-8 bg-zinc-50/20 animate-fade-in-up">
           <!-- Icon -->
           <div class="h-12 w-12 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center text-zinc-400 mb-4 shadow-sm">
@@ -621,7 +621,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
         <div v-else class="flex-grow overflow-hidden flex flex-col gap-4">
 
           <!-- Segment control: step tabs -->
-          <div class="grid grid-cols-3 p-1 bg-zinc-100/70 rounded-xl gap-0.5 border border-zinc-200/40 shrink-0">
+          <div class="grid grid-cols-3 p-1 bg-zinc-100 rounded-xl gap-0.5 border border-zinc-200 shrink-0">
             <button
               v-for="tab in [
                 { step: 1, label: 'Classification', status: step1Status },
@@ -655,11 +655,11 @@ watch(() => scopeStore.isStreaming, (streaming) => {
             </button>
           </div>
 
-          <!-- View Mode selector & Title -->
-          <div class="flex items-center justify-between border-b border-zinc-150/80 pb-3">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-450 select-none">Workspace View</span>
-            
-            <div class="flex p-0.5 bg-zinc-100 rounded-lg gap-0.5 border border-zinc-200/50">
+          <!-- View Mode selector -->
+          <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+            <span class="text-[11px] font-semibold text-zinc-500 tracking-[0.08em] uppercase select-none">Workspace View</span>
+
+            <div class="flex p-0.5 bg-zinc-100 rounded-lg gap-0.5 border border-zinc-200">
               <button
                 v-for="mode in [
                   { key: 'steps', label: 'Tab view' },
@@ -700,8 +700,8 @@ watch(() => scopeStore.isStreaming, (streaming) => {
             <!-- TABS VIEW -->
             <div v-if="viewMode === 'steps'" key="steps" ref="scrollContainer" class="flex-grow overflow-y-auto pr-1 scroll-smooth">
               <transition name="tab-fade" mode="out-in">
-                <article v-if="activeSection" :key="activeSection.step" class="rounded-xl border border-zinc-200 p-5 bg-white shadow-xs">
-                  <header class="mb-4.5 flex items-center justify-between pb-3.5 border-b border-zinc-100">
+                <article v-if="activeSection" :key="activeSection.step" class="rounded-xl border border-zinc-200 p-5 sm:p-6 bg-white">
+                  <header class="mb-5 flex items-center justify-between pb-4 border-b border-zinc-100">
                     <h3 class="text-xs font-bold text-zinc-950 flex items-center gap-2 tracking-tight">
                       <span class="h-5 w-5 rounded bg-zinc-100 text-[10px] font-extrabold text-zinc-500 flex items-center justify-center">{{ activeSection.step }}</span>
                       {{ activeSection.title }}
@@ -721,19 +721,19 @@ watch(() => scopeStore.isStreaming, (streaming) => {
                 <!-- Shimmering Skeleton for Locked Steps under active generation -->
                 <div v-else-if="scopeStore.isStreaming" key="streaming-shimmer" class="flex flex-col gap-5 py-6">
                   <div class="flex items-center gap-3">
-                    <div class="h-5.5 w-5.5 rounded-md shimmer-block shrink-0"></div>
-                    <div class="h-4.5 bg-zinc-250 rounded-md w-1/3 shimmer-block"></div>
+                    <div class="h-5 w-5 rounded-md skeleton shrink-0"></div>
+                    <div class="h-4 bg-zinc-200 rounded-md w-1/3 skeleton"></div>
                   </div>
                   <div class="flex flex-col gap-3">
-                    <div class="h-4 bg-zinc-100 rounded-md w-full shimmer-block"></div>
-                    <div class="h-4 bg-zinc-100 rounded-md w-11/12 shimmer-block"></div>
-                    <div class="h-4 bg-zinc-100 rounded-md w-4/5 shimmer-block"></div>
+                    <div class="h-4 bg-zinc-100 rounded-md w-full skeleton"></div>
+                    <div class="h-4 bg-zinc-100 rounded-md w-11/12 skeleton"></div>
+                    <div class="h-4 bg-zinc-100 rounded-md w-4/5 skeleton"></div>
                   </div>
                   <div class="h-px bg-zinc-100 my-2"></div>
-                  <div class="p-5 border border-zinc-150 rounded-xl bg-zinc-50/50 space-y-3">
-                    <div class="h-4 bg-zinc-200 rounded-md w-1/5 shimmer-block"></div>
-                    <div class="h-3.5 bg-zinc-100 rounded-md w-full shimmer-block"></div>
-                    <div class="h-3.5 bg-zinc-100 rounded-md w-4/5 shimmer-block"></div>
+                  <div class="p-5 border border-zinc-100 rounded-xl bg-zinc-50 space-y-3">
+                    <div class="h-4 bg-zinc-200 rounded-md w-1/5 skeleton"></div>
+                    <div class="h-3.5 bg-zinc-100 rounded-md w-full skeleton"></div>
+                    <div class="h-3.5 bg-zinc-100 rounded-md w-4/5 skeleton"></div>
                   </div>
                 </div>
 
@@ -753,19 +753,19 @@ watch(() => scopeStore.isStreaming, (streaming) => {
 
             <!-- FULL REPORT VIEW -->
             <div v-else-if="viewMode === 'full'" key="full" ref="scrollContainer" class="flex-grow overflow-y-auto pr-1 scroll-smooth">
-              <div class="border border-zinc-200 rounded-xl p-6 md:p-8 flex flex-col gap-6 bg-white shadow-xs">
-                
+              <div class="border border-zinc-200 rounded-xl p-6 md:p-8 flex flex-col gap-6 bg-white">
+
                 <!-- Report header -->
                 <div class="border-b border-zinc-100 pb-5">
                   <div class="flex items-center justify-between mb-3">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-450">System Architecture Specification</span>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-450 bg-zinc-100 px-1.5 py-0.5 rounded">CONFIDENTIAL</span>
+                    <span class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">System Architecture Specification</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200">Confidential</span>
                   </div>
                   <h3 class="text-xl font-extrabold text-zinc-950 tracking-tight leading-none">Engineering Scope Blueprint</h3>
-                  <p class="text-xs text-zinc-450 mt-1.5">Unified report detailing application constraints, risks, stack composition, and milestone schedules.</p>
-                  
+                  <p class="text-xs text-zinc-500 mt-1.5">Unified report detailing application constraints, risks, stack composition, and milestone schedules.</p>
+
                   <!-- Facts Grid -->
-                  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-zinc-50/50 rounded-xl p-4.5 border border-zinc-150/80 mt-5">
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-zinc-50 rounded-xl p-4 border border-zinc-100 mt-5">
                     <div class="flex flex-col">
                       <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
                         <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -775,7 +775,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
                         </svg>
                         Project Type
                       </span>
-                      <span class="text-[11px] font-bold text-zinc-750 capitalize tracking-wide">{{ scopeStore.projectType.replace('_', ' ') }}</span>
+                      <span class="text-[11px] font-bold text-zinc-700 capitalize tracking-wide">{{ scopeStore.projectType.replace('_', ' ') }}</span>
                     </div>
                     <div class="flex flex-col">
                       <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
@@ -785,7 +785,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
                         </svg>
                         Industry Domain
                       </span>
-                      <span class="text-[11px] font-bold text-zinc-750 truncate tracking-wide">{{ scopeStore.industry || 'General Domain' }}</span>
+                      <span class="text-[11px] font-bold text-zinc-700 truncate tracking-wide">{{ scopeStore.industry || 'General Domain' }}</span>
                     </div>
                     <div class="flex flex-col">
                       <span class="text-[9px] uppercase tracking-wider text-zinc-400 font-extrabold flex items-center gap-1.5 mb-1 select-none">
@@ -807,7 +807,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
                         </svg>
                         Target Platforms
                       </span>
-                      <span class="text-[11px] font-bold text-zinc-750 capitalize truncate tracking-wide">{{ scopeStore.platforms.join(', ') }}</span>
+                      <span class="text-[11px] font-bold text-zinc-700 capitalize truncate tracking-wide">{{ scopeStore.platforms.join(', ') }}</span>
                     </div>
                   </div>
                 </div>
@@ -834,54 +834,53 @@ watch(() => scopeStore.isStreaming, (streaming) => {
             <!-- EDITOR VIEW -->
             <div v-else-if="viewMode === 'editor'" key="editor" class="flex-grow flex flex-col gap-3 overflow-hidden">
               <div class="shrink-0 flex items-center justify-between">
-                <span class="text-xs font-bold text-zinc-950">Markdown Workspace</span>
+                <span class="text-[12px] font-bold text-zinc-950">Markdown Workspace</span>
                 <button
                   type="button"
-                  class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-zinc-950 hover:bg-zinc-900 text-white border-none cursor-pointer transition-colors shadow-xs"
+                  class="text-[12px] font-semibold px-3.5 py-1.5 rounded-lg bg-zinc-950 hover:bg-zinc-800 text-white border-none cursor-pointer transition-colors"
                   @click="saveEditorChanges"
                 >
                   Sync Back Changes
                 </button>
               </div>
-              
-              <div class="flex-grow flex flex-col rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950 shadow-md">
-                <!-- Monospace Editor Toolbar -->
-                <div class="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-zinc-900 border-b border-zinc-800">
+
+              <div class="flex-grow flex flex-col rounded-xl overflow-hidden border border-zinc-200 bg-white">
+                <div class="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-zinc-50 border-b border-zinc-200">
                   <button v-for="btn in [
                     { syntax: 'bold', label: 'B', cls: 'font-bold' },
                     { syntax: 'italic', label: 'I', cls: 'italic' }
                   ]" :key="btn.syntax" type="button" @click="insertMarkdown(btn.syntax)"
-                    :class="'px-2 py-0.5 hover:bg-zinc-700/50 rounded text-xs text-zinc-400 hover:text-zinc-200 cursor-pointer border-none bg-transparent transition-colors ' + btn.cls"
+                    :class="'px-2 py-0.5 hover:bg-zinc-200 rounded text-xs text-zinc-600 hover:text-zinc-900 cursor-pointer border-none bg-transparent transition-colors ' + btn.cls"
                   >{{ btn.label }}</button>
-                  
-                  <div class="w-px h-3 bg-zinc-800 mx-1"></div>
-                  
+
+                  <div class="w-px h-3 bg-zinc-200 mx-1"></div>
+
                   <button v-for="btn in [
                     { syntax: 'code', icon: 'pi-code' },
                     { syntax: 'link', icon: 'pi-link' },
                     { syntax: 'list', icon: 'pi-list' }
                   ]" :key="btn.syntax" type="button" @click="insertMarkdown(btn.syntax)"
-                    class="px-2 py-0.5 hover:bg-zinc-700/50 rounded text-zinc-400 hover:text-zinc-200 cursor-pointer border-none bg-transparent transition-colors"
+                    class="px-2 py-0.5 hover:bg-zinc-200 rounded text-zinc-600 hover:text-zinc-900 cursor-pointer border-none bg-transparent transition-colors"
                   ><i :class="'pi ' + btn.icon + ' text-[10px]'"></i></button>
-                  
-                  <span class="ml-auto text-[10px] text-zinc-500 select-none font-mono">markdown-mode</span>
+
+                  <span class="ml-auto text-[10px] text-zinc-400 select-none font-mono">markdown</span>
                 </div>
-                
+
                 <textarea
                   v-model="fullMarkdownText"
-                  class="flex-grow w-full bg-transparent text-zinc-300 text-[13px] p-4.5 focus:outline-none border-none resize-none leading-relaxed font-mono overflow-y-auto"
+                  class="flex-grow w-full bg-white text-zinc-800 text-[13px] p-4 focus:outline-none border-none resize-none leading-relaxed font-mono overflow-y-auto"
                   placeholder="Edit the unified markdown scope document here..."
                 ></textarea>
               </div>
-              <p class="shrink-0 text-[11px] text-zinc-400">Edits made here are saved directly back into your Tabs and Report layouts.</p>
+              <p class="shrink-0 text-[11px] text-zinc-500">Edits made here are saved directly back into your tabs and report layouts.</p>
             </div>
           </transition>
 
           <!-- Export Actions -->
-          <div v-if="hasDocument" class="flex flex-wrap justify-end gap-2 border-t border-zinc-100 pt-3.5 mt-1 shrink-0">
+          <div v-if="hasDocument" class="flex flex-wrap justify-end gap-2 border-t border-zinc-100 pt-4 mt-1 shrink-0">
             <button
               type="button"
-              class="inline-flex items-center gap-1.5 rounded-lg text-xs font-semibold py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-950 cursor-pointer transition-all duration-150 active:scale-[0.97] shadow-xs"
+              class="inline-flex items-center gap-1.5 rounded-lg text-[12px] font-semibold py-2 px-3.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-950 cursor-pointer transition-all duration-150 active:scale-[0.97]"
               @click="copyToClipboard"
             >
               <i :class="isCopied ? 'pi pi-check text-emerald-600' : 'pi pi-copy'"></i>
@@ -889,7 +888,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
             </button>
             <button
               type="button"
-              class="inline-flex items-center gap-1.5 rounded-lg text-xs font-semibold py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-950 cursor-pointer transition-all duration-150 active:scale-[0.97] shadow-xs"
+              class="inline-flex items-center gap-1.5 rounded-lg text-[12px] font-semibold py-2 px-3.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-950 cursor-pointer transition-all duration-150 active:scale-[0.97]"
               @click="copyRichText"
             >
               <i class="pi pi-copy text-indigo-500"></i>
@@ -897,7 +896,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
             </button>
             <button
               type="button"
-              class="inline-flex items-center gap-1.5 rounded-lg text-xs font-semibold py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-950 cursor-pointer transition-all duration-150 active:scale-[0.97] shadow-xs"
+              class="inline-flex items-center gap-1.5 rounded-lg text-[12px] font-semibold py-2 px-3.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-950 cursor-pointer transition-all duration-150 active:scale-[0.97]"
               @click="exportToGoogleDoc"
             >
               <i class="pi pi-external-link text-blue-500"></i>
@@ -905,7 +904,7 @@ watch(() => scopeStore.isStreaming, (streaming) => {
             </button>
             <button
               type="button"
-              class="inline-flex items-center gap-1.5 rounded-lg text-xs font-semibold py-1.5 px-3.5 bg-zinc-950 hover:bg-zinc-800 text-white border-none cursor-pointer transition-all duration-150 active:scale-[0.97] shadow-sm"
+              class="inline-flex items-center gap-1.5 rounded-lg text-[12px] font-semibold py-2 px-4 bg-zinc-950 hover:bg-zinc-800 text-white border-none cursor-pointer transition-all duration-150 active:scale-[0.97]"
               @click="downloadDocument"
             >
               <i class="pi pi-download"></i>
