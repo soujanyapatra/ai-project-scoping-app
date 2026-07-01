@@ -19,10 +19,38 @@ class ScopeController extends Controller
 
         Cache::put($this->cacheKey($sessionId), $payload, now()->addHour());
 
-        return response()->json([
-            'sessionId' => $sessionId,
-            'streamUrl' => url("/api/scope/stream/{$sessionId}"),
-        ]);
+        if (config('fastapi.mock')) {
+            return response()->json([
+                'sessionId' => $sessionId,
+                'streamUrl' => url("/api/scope/stream/{$sessionId}"),
+            ]);
+        }
+
+        try {
+            $baseUrl = rtrim((string) config('fastapi.base_url'), '/');
+            $client = new \GuzzleHttp\Client();
+            $client->request('POST', $baseUrl . '/api/v1/scope/initiate', [
+                'json' => [
+                    'session_id' => $sessionId,
+                    'payload' => $payload,
+                ],
+                'timeout' => 4.0,
+            ]);
+
+            return response()->json([
+                'sessionId' => $sessionId,
+                'streamUrl' => $baseUrl . "/api/v1/scope/stream/{$sessionId}",
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('FastAPI session initiate failed. Falling back to local proxy.', [
+                'message' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'sessionId' => $sessionId,
+                'streamUrl' => url("/api/scope/stream/{$sessionId}"),
+            ]);
+        }
     }
 
     public function stream(
