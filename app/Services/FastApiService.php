@@ -46,7 +46,11 @@ class FastApiService
             $buffer = '';
 
             while (! $body->eof()) {
-                $buffer .= $body->read(4096);
+                $chunk = $body->read(4096);
+                if ($chunk === '') {
+                    break;
+                }
+                $buffer .= $chunk;
 
                 while (($pos = strpos($buffer, "\n\n")) !== false) {
                     $rawEvent = substr($buffer, 0, $pos);
@@ -73,7 +77,7 @@ class FastApiService
                     }
                 }
             }
-        } catch (GuzzleException $e) {
+        } catch (\Throwable $e) {
             Log::warning('FastAPI request failed', ['message' => $e->getMessage()]);
             $emit(['type' => 'error', 'message' => 'FastAPI unavailable.']);
         }

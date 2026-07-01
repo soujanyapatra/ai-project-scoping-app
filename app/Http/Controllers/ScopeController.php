@@ -40,9 +40,14 @@ class ScopeController extends Controller
         return $sse->stream(function (callable $send) use ($fastApi, $payload) {
             $send(['type' => 'step_start', 'step' => 0, 'section' => 'init', 'content' => 'Starting…']);
 
-            $fastApi->streamChain($payload, function (array $event) use ($send) {
-                $send($event);
-            });
+            try {
+                $fastApi->streamChain($payload, function (array $event) use ($send) {
+                    $send($event);
+                });
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Stream chain failed', ['exception' => $e]);
+                $send(['type' => 'error', 'message' => 'An internal server error occurred while streaming.']);
+            }
         });
     }
 
