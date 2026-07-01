@@ -896,14 +896,6 @@ watch(() => scopeStore.isStreaming, (streaming) => {
             </button>
             <button
               type="button"
-              class="inline-flex items-center gap-1.5 rounded-lg text-[12px] font-semibold py-2 px-3.5 border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-950 cursor-pointer transition-all duration-150 active:scale-[0.97]"
-              @click="exportToGoogleDoc"
-            >
-              <i class="pi pi-external-link text-blue-500"></i>
-              Google Docs
-            </button>
-            <button
-              type="button"
               class="inline-flex items-center gap-1.5 rounded-lg text-[12px] font-semibold py-2 px-4 bg-zinc-950 hover:bg-zinc-800 text-white border-none cursor-pointer transition-all duration-150 active:scale-[0.97]"
               @click="downloadDocument"
             >
