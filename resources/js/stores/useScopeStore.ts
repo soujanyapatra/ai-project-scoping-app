@@ -95,7 +95,7 @@ export const useScopeStore = defineStore('scope', () => {
     const existingIdx = sections.value.findIndex((s) => s.step === next.step && s.title === next.title)
     if (existingIdx >= 0) {
       const existing = sections.value[existingIdx]
-      sections.value.splice(existingIdx, 1, { ...existing, content: next.content })
+      sections.value.splice(existingIdx, 1, { ...existing, content: existing.content + next.content })
       return
     }
     sections.value.push(next)
